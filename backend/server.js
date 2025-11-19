@@ -5,6 +5,8 @@ import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import eventRoutes from "./routes/eventRoutes.js";
+import passport from "passport";
 
 dotenv.config();
 const app = express();
@@ -16,6 +18,8 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/events", eventRoutes);
+app.use(passport.initialize());
 
 // Basic route
 app.get("/", (req, res) => {

@@ -1,5 +1,7 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
+import Event from "../models/Event.js";
+
 
 // 🟢 GET USER PROFILE
 export const getUserProfile = async (req, res) => {
@@ -38,6 +40,8 @@ export const updateUserProfile = async (req, res) => {
         name: updatedUser.name,
         email: updatedUser.email,
         role: updatedUser.role,
+        avatar: updatedUser.avatar,  // ADD THIS
+
       },
     });
   } catch (error) {
@@ -92,3 +96,36 @@ export const deleteUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const updateProfileAvatar = async (req, res) => {
+  try {
+    console.log("FILE RECEIVED FROM MULTER:", req.file);
+
+    const user = await User.findById(req.user.id);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.avatar = req.file.path; // Cloudinary URL
+    await user.save();
+
+    res.json({ message: "Avatar updated!", avatar: user.avatar });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getMyEvents = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const organized = await Event.find({ organizer: userId }).sort({ date: 1 });
+    const registered = await Event.find({ attendees: userId }).sort({ date: 1 });
+
+    res.json({ organized, registered });
+  } catch (err) {
+    console.error("getMyEvents error:", err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+

@@ -29,8 +29,15 @@ const userSchema = new mongoose.Schema(
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
+    avatar: {
+      type: String,
+      default: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+},
+
 
   },
+
+  
   {
     timestamps: true, // automatically adds createdAt and updatedAt
   }

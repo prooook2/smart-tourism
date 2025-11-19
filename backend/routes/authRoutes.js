@@ -12,7 +12,7 @@ import {
 
 const router = express.Router();
 
-// 🔹 Auth routes
+// 🔹 Email/password authentication
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 
@@ -20,22 +20,36 @@ router.post("/login", loginUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
 
-// Redirect user to Google
+// 🔹 Start Google login
 router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-// Handle callback from Google
+// 🔹 Handle Google callback
 router.get(
   "/google/callback",
-  passport.authenticate("google", { session: false }),
-  (req, res) => {
-    const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
-    // redirect back to frontend with token
-    res.redirect(`http://localhost:3000/google-success?token=${token}`);
+  passport.authenticate("google", { session: false, failureRedirect: "http://localhost:3000/login" }),
+  async (req, res) => {
+    try {
+      // Create token that includes role
+      const token = jwt.sign(
+        { id: req.user._id, role: req.user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      // Serialize user info to send to frontend
+      const user = JSON.stringify(req.user);
+
+      // Redirect back to frontend login page with token and user info
+      res.redirect(
+        `http://localhost:3000/login?token=${token}&user=${encodeURIComponent(user)}`
+      );
+    } catch (error) {
+      console.error("❌ Google Auth Error:", error);
+      res.redirect("http://localhost:3000/login?error=GoogleAuthFailed");
+    }
   }
 );
 
