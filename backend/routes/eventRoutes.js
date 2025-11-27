@@ -29,7 +29,8 @@ router.post(
   uploadEventImage.single("image"),
   createEvent
 );
-router.put("/:id", verifyToken, authorizeRoles("organisateur", "admin"), updateEvent);
+router.put("/:id", verifyToken, authorizeRoles("organisateur", "admin"),  uploadEventImage.single("image"),
+ updateEvent);
 router.delete("/:id", verifyToken, authorizeRoles("organisateur", "admin"), deleteEvent);
 router.post("/:id/register", verifyToken, registerForEvent);
 router.post("/:id/cancel", verifyToken, cancelRegistration);

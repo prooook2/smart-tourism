@@ -1,8 +1,12 @@
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
+import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { FcGoogle } from "react-icons/fc";
+import AuthLayout from "../components/AuthLayout";
+
+const inputClass =
+  "w-full rounded-2xl border border-pink-100 bg-secondary/80 px-4 py-3 text-sm text-ink outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -24,85 +28,105 @@ const Register = () => {
     }
   };
 
-  // 🔹 Google signup
   const handleGoogleSignup = () => {
     window.location.href = "http://localhost:5000/api/auth/google";
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-    
-      <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
-        <h2 className="text-3xl font-bold text-center text-indigo-700 mb-6">
-          Créer un compte
-        </h2>
+    <AuthLayout
+      badge="Création de compte"
+      title="Élaborez des voyages iconiques."
+      subtitle="Rejoignez la communauté Smart Tourism et offrez à vos visiteurs des expériences raffinées et orchestrées."
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-dusk" htmlFor="name">
+              Nom complet
+            </label>
+            <input
+              id="name"
+              type="text"
+              placeholder="Alexia Dupont"
+              className={inputClass}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
+            />
+          </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            placeholder="Nom complet"
-            className="w-full border border-gray-300 rounded-lg p-2"
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required
-          />
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-dusk" htmlFor="role">
+              Profil
+            </label>
+            <select
+              id="role"
+              className={`${inputClass} appearance-none cursor-pointer`}
+              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+              value={formData.role}
+            >
+              <option value="visiteur">Visiteur curateur</option>
+              <option value="organisateur">Organisateur d’expériences</option>
+            </select>
+          </div>
+        </div>
 
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-dusk" htmlFor="email">
+            Email de contact
+          </label>
           <input
+            id="email"
             type="email"
-            placeholder="Email"
-            className="w-full border border-gray-300 rounded-lg p-2"
+            placeholder="vous@maisoncreative.com"
+            className={inputClass}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             required
           />
+        </div>
 
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-dusk" htmlFor="password">
+            Mot de passe
+          </label>
           <input
+            id="password"
             type="password"
-            placeholder="Mot de passe"
-            className="w-full border border-gray-300 rounded-lg p-2"
+            placeholder="••••••••"
+            className={inputClass}
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             required
           />
-
-          <select
-            className="w-full border border-gray-300 rounded-lg p-2"
-            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-            value={formData.role}
-          >
-            <option value="visiteur">Visiteur</option>
-            <option value="organisateur">Organisateur</option>
-          </select>
-
-          <button
-            type="submit"
-            className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
-          >
-            S’inscrire
-          </button>
-        </form>
-
-        {/* Divider */}
-        <div className="flex items-center my-4">
-          <hr className="flex-grow border-gray-300" />
-          <span className="mx-2 text-gray-500">ou</span>
-          <hr className="flex-grow border-gray-300" />
         </div>
 
-        {/* Google Signup */}
         <button
-          onClick={handleGoogleSignup}
-          className="flex items-center justify-center w-full border border-gray-300 py-2 rounded-lg hover:bg-gray-100 transition"
+          type="submit"
+          className="w-full rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5"
         >
-          <FcGoogle className="text-2xl mr-2" />
-          S’inscrire avec Google
+          Créer mon compte
         </button>
+      </form>
 
-        <p className="text-center text-sm text-gray-600 mt-4">
-          Vous avez déjà un compte ?{" "}
-          <a href="/" className="text-indigo-600 hover:underline">
-            Se connecter
-          </a>
-        </p>
+      <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.3em] text-dusk/50">
+        <span className="h-px flex-1 bg-pink-100" />
+        ou
+        <span className="h-px flex-1 bg-pink-100" />
       </div>
-    </div>
+
+      <button
+        onClick={handleGoogleSignup}
+        className="flex w-full items-center justify-center gap-3 rounded-2xl border border-dusk/10 bg-white px-5 py-3 text-sm font-semibold text-dusk shadow-sm transition hover:border-primary/40 hover:text-primary"
+      >
+        <FcGoogle className="text-2xl" />
+        S’inscrire avec Google
+      </button>
+
+      <p className="text-center text-sm text-dusk/70">
+        Vous avez déjà un compte ?{" "}
+        <Link to="/login" className="font-semibold text-primary underline-offset-4 hover:underline">
+          Se connecter
+        </Link>
+      </p>
+    </AuthLayout>
   );
 };
 

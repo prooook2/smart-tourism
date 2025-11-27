@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
+import AuthLayout from "../components/AuthLayout";
+
+const inputClass =
+  "w-full rounded-2xl border border-pink-100 bg-secondary/80 px-4 py-3 text-sm text-ink outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30";
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -20,31 +24,35 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-      <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center text-indigo-700 mb-6">
-          Réinitialiser le mot de passe
-        </h2>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <AuthLayout
+      badge="Sécurité"
+      title="Définissez un nouveau mot de passe."
+      subtitle="Créez une combinaison forte pour sécuriser vos expériences et vos données."
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-dusk" htmlFor="new-password">
+            Nouveau mot de passe
+          </label>
           <input
+            id="new-password"
             type="password"
-            placeholder="Nouveau mot de passe"
+            placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded-lg p-2 focus:outline-indigo-600"
+            className={inputClass}
           />
+        </div>
 
-          <button
-            type="submit"
-            className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
-          >
-            Enregistrer
-          </button>
-        </form>
-      </div>
-    </div>
+        <button
+          type="submit"
+          className="w-full rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5"
+        >
+          Mettre à jour mon mot de passe
+        </button>
+      </form>
+    </AuthLayout>
   );
 };
 

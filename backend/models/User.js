@@ -22,6 +22,12 @@ const userSchema = new mongoose.Schema(
     },
     googleId: { type: String },
     
+    interests: {
+      type: [String],
+      default: []
+    },
+
+
     role: {
       type: String,
       enum: ["admin", "organisateur", "visiteur"],

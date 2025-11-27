@@ -15,6 +15,9 @@ import GoogleSuccess from "./pages/GoogleSuccess";
 import EventList from "./pages/EventList";
 import EventCreate from "./pages/EventCreate";
 import EventDetails from "./pages/EventDetails";
+import EventEdit from "./pages/EventEdit";
+import SuccessPage from "./pages/SuccessPage";
+import CancelPage from "./pages/CancelPage";
 
 function App() {
   return (
@@ -87,6 +90,21 @@ function App() {
             </ProtectedRoute>
           }
         />
+         <Route
+          path="/events/:id/edit"
+          element={
+            <ProtectedRoute roles={["organisateur", "admin"]}>
+              <EventEdit />
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route path="/payment/success" element={<SuccessPage />} />
+        <Route path="/cancel" element={<CancelPage />} />
+  
+        
+       
+
 
       </Routes>
     </Router>

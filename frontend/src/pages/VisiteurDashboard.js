@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import LogoutButton from "../components/LogoutButton";
 
-
 const VisiteurDashboard = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
@@ -15,24 +14,58 @@ const VisiteurDashboard = () => {
     }
   }, [user, navigate]);
 
+  const highlights = [
+    {
+      title: "Recommandations personnalisées",
+      description: "Restez inspiré avec une veille culturelle adaptée à vos envies.",
+      action: () => navigate("/events"),
+      actionLabel: "Explorer maintenant",
+    },
+    {
+      title: "Billets sécurisés",
+      description: "Retrouvez vos réservations et billets dans votre espace profil.",
+      action: () => navigate("/profile"),
+      actionLabel: "Voir mon profil",
+    },
+  ];
+
   return (
-    <div className="p-8 min-h-screen bg-gray-50 text-center">
-      <h1 className="text-3xl font-bold text-indigo-700 mb-4">
-        Tableau de bord Visiteur
-      </h1>
-      <p className="text-gray-600 mb-6">
-        Découvrez les événements disponibles et partagez vos avis !
-      </p>
+    <section className="min-h-screen bg-gradient-to-b from-white via-[#fff5f9] to-[#ffe1ee] px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl space-y-10">
+        <div className="rounded-[32px] border border-white/60 bg-white/90 p-8 text-center shadow-2xl shadow-primary/20 backdrop-blur">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Espace visiteur</p>
+          <h1 className="mt-4 text-4xl font-bold text-ink">Bienvenue {user?.name} 👋</h1>
+          <p className="mt-3 text-dusk/70">
+            Continuez à explorer des expériences immersives, suivez vos billets et partagez vos coups de cœur.
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-4">
+            <button
+              onClick={() => navigate("/events")}
+              className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5"
+            >
+              🎟️ Voir les événements
+            </button>
+            <LogoutButton />
+          </div>
+        </div>
 
-      <button
-        onClick={() => navigate("/events")}
-        className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
-      >
-        🎟️ Voir les événements
-      </button>
-      <LogoutButton />
-
-    </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          {highlights.map((item) => (
+            <div key={item.title} className="rounded-3xl border border-pink-50 bg-white/90 p-6 shadow-lg shadow-primary/10">
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-dusk/60">À découvrir</p>
+              <h2 className="mt-4 text-2xl font-semibold text-ink">{item.title}</h2>
+              <p className="mt-3 text-dusk/70">{item.description}</p>
+              <button
+                onClick={item.action}
+                className="mt-6 text-sm font-semibold text-primary underline-offset-4 hover:underline"
+              >
+                {item.actionLabel} →
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 };
 

@@ -1,6 +1,8 @@
 // backend/controllers/eventController.js
 import Event from "../models/Event.js";
 import User from "../models/User.js";
+import sendEmail from "../Utils/sendEmail.js"; // make sure you have this
+
 
 // Create event (organiser or admin)
 export const createEvent = async (req, res) => {
@@ -9,21 +11,34 @@ export const createEvent = async (req, res) => {
 
     // Parse location JSON
     // Fix location coming from FormData
-    if (data.location) {
+   if (data.location) {
       try {
         data.location = JSON.parse(data.location);
+        data.location.coords = data.location.coords || { lat: 0, lng: 0 };
       } catch (err) {
         console.error("Location JSON parse error:", err);
-        data.location = { city: "" };
+        data.location = { city: "", coords: { lat: 0, lng: 0 } };
       }
     } else {
-      data.location = { city: "" };
+      data.location = { city: "", coords: { lat: 0, lng: 0 } };
     }
+
+    if (data.coords) {
+        try {
+          data.location.coords = JSON.parse(data.coords);
+        } catch (e) {
+          data.location.coords = [];
+        }
+      }
+
+
 
 
 
     // Set organiser to logged user
     data.organizer = req.user.id;
+    data.price = Number(data.price || 0);
+
 
     // Save image if uploaded
     if (req.file) {
@@ -89,37 +104,74 @@ export const updateEvent = async (req, res) => {
     if (!event) return res.status(404).json({ message: "Événement introuvable" });
 
     // only organiser or admin
-    if (req.user.role !== "admin" && event.organizer.toString() !== req.user._id.toString()) {
+    if (req.user.role !== "admin" && event.organizer.toString() !== req.user.id) {
       return res.status(403).json({ message: "Non autorisé à modifier cet événement" });
     }
 
-    Object.assign(event, req.body);
+    let data = req.body;
+
+    // Parse structured fields
+    if (data.location) {
+      try {
+        data.location = JSON.parse(data.location);
+      } catch (e) {
+        data.location = event.location; // fallback
+      }
+    }
+
+    // If image uploaded
+    if (req.file) {
+      data.image = req.file.path;
+    }
+
+    Object.assign(event, data);
     await event.save();
-    res.json({ event });
+
+    res.json({ message: "Événement mis à jour", event });
   } catch (err) {
     console.error("UpdateEvent error:", err);
     res.status(500).json({ message: "Erreur serveur" });
   }
 };
 
+
 // Delete event
 // controllers/eventController.js
 export const deleteEvent = async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
+    const event = await Event.findById(req.params.id)
+      .populate("attendees", "email name");
 
     if (!event) {
       return res.status(404).json({ message: "Événement introuvable" });
     }
 
-    // Optional: check if user is owner/admin
+    // Permission check
     if (req.user.role !== "admin" && event.organizer.toString() !== req.user.id) {
       return res.status(403).json({ message: "Accès refusé" });
     }
 
-    await Event.findByIdAndDelete(req.params.id); // ✅ instead of event.remove()
+    // Send email to all attendees
+    for (const attendee of event.attendees) {
+      if (!attendee.email) continue;
 
-    res.json({ message: "Événement supprimé avec succès" });
+      try {
+        await sendEmail(
+          attendee.email,
+          "Événement annulé",
+          `<p>Bonjour,</p>
+           <p>L'événement <strong>${event.title}</strong> auquel vous étiez inscrit a été <span style="color:red">annulé</span>.</p>
+           <p>Cordialement,<br/>Plateforme Culturelle.</p>`
+        );
+      } catch (err) {
+        console.error("Email failed for:", attendee.email);
+      }
+    }
+
+    await Event.findByIdAndDelete(event._id);
+
+    res.json({ message: "Événement supprimé et participants notifiés" });
+
   } catch (error) {
     console.error("DeleteEvent error:", error);
     res.status(500).json({ message: "Erreur serveur" });

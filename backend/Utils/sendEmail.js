@@ -3,7 +3,8 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 dotenv.config();
 
-const sendEmail = async (to, subject, html) => {
+
+const sendEmail = async (to, subject, html, attachments) => {
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -18,6 +19,7 @@ const sendEmail = async (to, subject, html) => {
       to,
       subject,
       html,
+      attachments,
     });
 
     console.log("✅ Email sent successfully:", info.messageId);
