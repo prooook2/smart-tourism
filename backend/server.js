@@ -8,6 +8,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 import passport from "passport";
 import bodyParser from "body-parser";
 import { stripeWebhook } from "./controllers/paymentController.js";
@@ -39,6 +40,7 @@ app.use(passport.initialize());
 app.use("/api/payments", paymentLimiter, paymentRoutes);
 app.use("/api/recommend", generalLimiter, recommendRoutes);
 app.use("/api/reviews", generalLimiter, reviewRoutes);
+app.use("/api/notifications", generalLimiter, notificationRoutes);
 
 
 // Basic test route

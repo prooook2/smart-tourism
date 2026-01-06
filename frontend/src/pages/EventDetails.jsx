@@ -7,6 +7,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import SaveEventButton from "../components/SaveEventButton";
 import EventReviewSection from "../components/EventReviewSection";
+import { sendEventNotification } from "../utils/notifications";
 
 // Fix Leaflet icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -29,6 +30,8 @@ export default function EventDetails() {
   const [loading, setLoading] = useState(true);
   const [registered, setRegistered] = useState(false);
   const [selectedTicketId, setSelectedTicketId] = useState(null);
+  const [notifyData, setNotifyData] = useState({ type: "reminder", title: "", message: "", includeSaved: false });
+  const [sending, setSending] = useState(false);
 
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -115,6 +118,28 @@ export default function EventDetails() {
       window.location.href = res.data.url; // Redirect to Stripe
     } catch (err) {
       toast.error("Erreur lors du paiement");
+    }
+  };
+
+  const organizerId = event?.organizer?._id || event?.organizer;
+  const canNotify = token && (user.role === "admin" || organizerId === user._id);
+
+  const handleSendNotification = async (e) => {
+    e.preventDefault();
+    if (!notifyData.message.trim()) {
+      toast.error("Ajoutez un message à envoyer");
+      return;
+    }
+    try {
+      setSending(true);
+      await sendEventNotification(id, notifyData, token);
+      toast.success("Notification envoyée");
+      setNotifyData({ ...notifyData, message: "", title: notifyData.title });
+    } catch (err) {
+      const msg = err.response?.data?.message || "Envoi impossible";
+      toast.error(msg);
+    } finally {
+      setSending(false);
     }
   };
 
@@ -263,6 +288,71 @@ export default function EventDetails() {
 
           </div>
         </div>
+
+        {canNotify && (
+          <div className="mx-auto max-w-5xl rounded-3xl border border-primary/15 bg-white/95 p-6 shadow-lg shadow-primary/15">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Notifier les inscrits</p>
+                <h2 className="text-2xl font-semibold text-ink">Envoyer un rappel ou une annonce</h2>
+                <p className="text-sm text-dusk/70">Participants inscrits et, en option, ceux qui ont sauvegardé l'événement.</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSendNotification} className="mt-4 grid gap-4 md:grid-cols-2">
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-dusk/80">Type de notification</label>
+                <select
+                  value={notifyData.type}
+                  onChange={(e) => setNotifyData({ ...notifyData, type: e.target.value })}
+                  className="w-full rounded-2xl border border-dusk/10 bg-secondary px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
+                >
+                  <option value="reminder">Rappel</option>
+                  <option value="update">Mise à jour</option>
+                  <option value="cancellation">Annulation</option>
+                </select>
+
+                <label className="block text-sm font-semibold text-dusk/80">Titre (optionnel)</label>
+                <input
+                  type="text"
+                  value={notifyData.title}
+                  onChange={(e) => setNotifyData({ ...notifyData, title: e.target.value })}
+                  placeholder={`Ex: ${event.title} - information importante`}
+                  className="w-full rounded-2xl border border-dusk/10 bg-white px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-dusk/80">Message</label>
+                <textarea
+                  value={notifyData.message}
+                  onChange={(e) => setNotifyData({ ...notifyData, message: e.target.value })}
+                  rows={5}
+                  placeholder="Partagez le lieu, l'heure d'arrivée, ou toute mise à jour logistique."
+                  className="w-full rounded-2xl border border-dusk/10 bg-white px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
+                />
+
+                <label className="inline-flex items-center gap-2 text-sm font-semibold text-dusk/80">
+                  <input
+                    type="checkbox"
+                    checked={notifyData.includeSaved}
+                    onChange={(e) => setNotifyData({ ...notifyData, includeSaved: e.target.checked })}
+                    className="h-4 w-4 rounded border-dusk/40 text-primary focus:ring-primary"
+                  />
+                  Inclure aussi les personnes ayant mis en favori
+                </label>
+
+                <button
+                  type="submit"
+                  disabled={sending}
+                  className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {sending ? "Envoi..." : "Envoyer la notification"}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
 
         <EventReviewSection eventId={id} isRegistered={registered} />
 

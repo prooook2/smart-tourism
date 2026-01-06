@@ -72,6 +72,9 @@ const Navbar = () => {
               <Link to="/saved-events" className="hover:text-primary transition-colors">
                 ❤️ Favoris
               </Link>
+              <Link to="/notifications" className="hover:text-primary transition-colors">
+                🔔 Notifications
+              </Link>
             </>
           )}
          {!token && (

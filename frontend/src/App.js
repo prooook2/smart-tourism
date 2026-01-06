@@ -22,6 +22,7 @@ import CancelPage from "./pages/CancelPage";
 import RecommendedEvents from "./pages/RecommendedEvents";
 import MyEvents from "./pages/MyEvents";
 import SavedEvents from "./pages/SavedEvents";
+import NotificationCenter from "./pages/NotificationCenter";
 
 function App() {
   return (
@@ -72,6 +73,15 @@ function App() {
           element={
             <ProtectedRoute>
               <SavedEvents />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <NotificationCenter />
             </ProtectedRoute>
           }
         />
