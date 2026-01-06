@@ -21,7 +21,7 @@ export const registerUser = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role: role || "tourist",
+      role: role || "visiteur",
     });
 
     res.status(201).json({

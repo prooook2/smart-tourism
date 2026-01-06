@@ -5,6 +5,8 @@ import toast from "react-hot-toast";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import SaveEventButton from "../components/SaveEventButton";
+import EventReviewSection from "../components/EventReviewSection";
 
 // Fix Leaflet icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -26,6 +28,7 @@ export default function EventDetails() {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [registered, setRegistered] = useState(false);
+  const [selectedTicketId, setSelectedTicketId] = useState(null);
 
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -36,6 +39,13 @@ export default function EventDetails() {
       try {
         const res = await axios.get(`http://localhost:5000/api/events/${id}`);
         setEvent(res.data.event);
+
+        if (res.data.event.ticketTypes?.length) {
+          const firstAvailable = res.data.event.ticketTypes.find(
+            (t) => (t.quantity || 0) - (t.sold || 0) > 0
+          );
+          setSelectedTicketId(firstAvailable?._id || res.data.event.ticketTypes[0]._id);
+        }
 
         // If user already registered
         if (token && res.data.event.attendees?.some(a => a._id === user._id)) {
@@ -52,10 +62,14 @@ export default function EventDetails() {
 
   // Register for FREE event
   const handleRegister = async () => {
+    if (event.ticketTypes?.length && !selectedTicketId) {
+      toast.error("Choisissez un type de billet");
+      return;
+    }
     try {
       await axios.post(
         `http://localhost:5000/api/events/${id}/register`,
-        {},
+        event.ticketTypes?.length ? { ticketTypeId: selectedTicketId } : {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success("Inscription réussie !");
@@ -71,7 +85,7 @@ export default function EventDetails() {
     try {
       await axios.post(
         `http://localhost:5000/api/events/${id}/cancel`,
-        {},
+        event.ticketTypes?.length ? { ticketTypeId: selectedTicketId } : {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success("Désinscription réussie !");
@@ -87,10 +101,14 @@ export default function EventDetails() {
 
   // Stripe payment
   const handlePayment = async () => {
+    if (event.ticketTypes?.length && !selectedTicketId) {
+      toast.error("Choisissez un type de billet");
+      return;
+    }
     try {
       const res = await axios.post(
         "http://localhost:5000/api/payments/create-checkout-session",
-        { eventId: event._id },
+        { eventId: event._id, ticketTypeId: selectedTicketId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -103,7 +121,18 @@ export default function EventDetails() {
   if (loading) return <div className="text-center mt-10 text-dusk/60">Chargement...</div>;
   if (!event) return <div className="text-center mt-10 text-dusk/60">Événement introuvable.</div>;
 
-  const isPaidEvent = event.price && event.price > 0;
+  const hasTicketTypes = event.ticketTypes?.length > 0;
+  const selectedTicket = hasTicketTypes
+    ? event.ticketTypes.find((t) => t._id === selectedTicketId) || event.ticketTypes[0]
+    : null;
+  const minTicketPrice = hasTicketTypes
+    ? Math.min(...event.ticketTypes.map((t) => Number(t.price) || 0))
+    : null;
+  const isPaidEvent = hasTicketTypes
+    ? (selectedTicket?.price || 0) > 0 || minTicketPrice > 0
+    : event.price && event.price > 0;
+  const isFull = event.attendees.length >= event.capacity;
+
 
   return (
     <section className="min-h-screen bg-gradient-to-b from-white via-[#fff5f9] to-[#ffe1ee] px-4 py-10 sm:px-6 lg:px-8">
@@ -116,12 +145,21 @@ export default function EventDetails() {
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">
               {new Date(event.date).toLocaleDateString()} · {event.location?.city || "Lieu confirmé prochainement"}
             </p>
-            <h1 className="mt-4 text-4xl font-bold text-ink">{event.title}</h1>
+            <div className="mt-4 flex items-start justify-between gap-4">
+              <h1 className="text-4xl font-bold text-ink">{event.title}</h1>
+              <SaveEventButton eventId={event._id} />
+            </div>
             <p className="mt-4 text-dusk/80 leading-relaxed">{event.description}</p>
 
             <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-dusk/70">
               <span className="rounded-full bg-primary/10 px-4 py-2 font-semibold text-primary">
-                {isPaidEvent ? `${event.price} € · Billetterie` : "Événement gratuit"}
+                {hasTicketTypes
+                  ? minTicketPrice && minTicketPrice > 0
+                    ? `À partir de ${minTicketPrice} € · Billetterie`
+                    : "Billets gratuits disponibles"
+                  : isPaidEvent
+                    ? `${event.price} € · Billetterie`
+                    : "Événement gratuit"}
               </span>
               <span>Organisé par {event.organizer?.name || "—"}</span>
               <span>
@@ -129,47 +167,104 @@ export default function EventDetails() {
               </span>
             </div>
 
-            <div className="mt-8">
-              {token ? (
-                isPaidEvent ? (
-                  registered ? (
+          {hasTicketTypes && (
+            <div className="mt-6 space-y-3">
+              <p className="text-sm font-semibold text-dusk">Choisissez votre billet</p>
+              <div className="grid gap-3 md:grid-cols-2">
+                {event.ticketTypes.map((t) => {
+                  const remaining = (t.quantity || 0) - (t.sold || 0);
+                  const soldOut = remaining <= 0;
+                  return (
                     <button
-                      onClick={handleCancel}
-                      className="rounded-full border border-red-200 px-6 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+                      key={t._id}
+                      type="button"
+                      onClick={() => !soldOut && setSelectedTicketId(t._id)}
+                      className={`flex flex-col rounded-2xl border p-4 text-left transition ${
+                        selectedTicketId === t._id ? "border-primary bg-primary/10" : "border-pink-100 bg-white"
+                      } ${soldOut ? "opacity-50" : "hover:-translate-y-0.5"}`}
+                      disabled={soldOut}
                     >
-                      Annuler ma participation
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm font-semibold text-ink">{t.label}</div>
+                        <div className="text-sm font-semibold text-primary">
+                          {t.price > 0 ? `${t.price} €` : "Gratuit"}
+                        </div>
+                      </div>
+                      {t.description && <p className="mt-1 text-xs text-dusk/70">{t.description}</p>}
+                      <div className="mt-2 text-xs font-semibold text-dusk/80">
+                        {soldOut ? "Complet" : `${remaining} restants`}
+                      </div>
                     </button>
-                  ) : (
-                    <button
-                      onClick={handlePayment}
-                      className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5"
-                    >
-                      Acheter un billet
-                    </button>
-                  )
-                ) : registered ? (
-                  <button
-                    onClick={handleCancel}
-                    className="rounded-full border border-red-200 px-6 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-                  >
-                    Annuler ma participation
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleRegister}
-                    className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5"
-                  >
-                    Réserver ma place
-                  </button>
-                )
-              ) : (
-                <p className="text-sm font-semibold text-primary">
-                  Connectez-vous pour réserver cette expérience.
-                </p>
-              )}
+                  );
+                })}
+              </div>
             </div>
+          )}
+
+         <div className="mt-8">
+  {token ? (
+    isPaidEvent ? (
+      registered ? (
+        // Already paid → can cancel
+        <button
+          onClick={handleCancel}
+          className="rounded-full border border-red-200 px-6 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+        >
+          Annuler ma participation
+        </button>
+      ) : isFull ? (
+        // Paid event but full → disable button
+        <button
+          disabled
+          className="rounded-full bg-gray-400 px-6 py-3 text-sm font-semibold text-white cursor-not-allowed"
+        >
+          Événement complet
+        </button>
+      ) : (
+        // Paid event & not registered & not full → buy ticket
+        <button
+          onClick={handlePayment}
+          className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5"
+        >
+          Acheter un billet
+        </button>
+      )
+      ) : registered ? (
+        // FREE event → already registered
+        <button
+          onClick={handleCancel}
+          className="rounded-full border border-red-200 px-6 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+        >
+          Annuler ma participation
+        </button>
+      ) : isFull ? (
+        // Free event but full → block
+        <button
+          disabled
+          className="rounded-full bg-gray-400 px-6 py-3 text-sm font-semibold text-white cursor-not-allowed"
+        >
+          Événement complet
+        </button>
+      ) : (
+        // Free event & not full → allow register
+        <button
+          onClick={handleRegister}
+          className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5"
+        >
+          Réserver ma place
+        </button>
+      )
+    ) : (
+      <p className="text-sm font-semibold text-primary">
+        Connectez-vous pour réserver cette expérience.
+      </p>
+    )}
+  </div>
+
           </div>
         </div>
+
+        <EventReviewSection eventId={id} isRegistered={registered} />
 
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-3xl border border-pink-50 bg-white/95 p-6 shadow-lg shadow-primary/10">

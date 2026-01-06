@@ -40,6 +40,11 @@ export default function EventCreate() {
     price: 0,
   });
 
+  const [useTicketTypes, setUseTicketTypes] = useState(false);
+  const [ticketTypes, setTicketTypes] = useState([
+    { label: "Standard", price: 0, quantity: 50, description: "" },
+  ]);
+
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [coords, setCoords] = useState({ lat: 36.8065, lng: 10.1815 });
@@ -72,7 +77,11 @@ export default function EventCreate() {
           coords: [coords.lat, coords.lng],
         })
       );
-      fd.append("price", form.price);
+      if (useTicketTypes) {
+        fd.append("ticketTypes", JSON.stringify(ticketTypes));
+      } else {
+        fd.append("price", form.price);
+      }
       fd.append("coords", JSON.stringify(coords));
 
       if (image) fd.append("image", image);
@@ -158,15 +167,121 @@ export default function EventCreate() {
                 />
               </div>
               <div className="space-y-3">
-                <label className="text-sm font-semibold text-dusk">Prix (€)</label>
-                <input
-                  type="number"
-                  placeholder="75"
-                  onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
-                  className={inputClass}
-                />
+                <label className="text-sm font-semibold text-dusk">Billetterie</label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setUseTicketTypes(false)}
+                    className={`${useTicketTypes ? "border-pink-100 text-dusk" : "border-primary bg-primary/10 text-primary"} w-1/2 rounded-xl border px-3 py-2 text-sm font-semibold`}
+                  >
+                    Prix unique
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setUseTicketTypes(true)}
+                    className={`${useTicketTypes ? "border-primary bg-primary/10 text-primary" : "border-pink-100 text-dusk"} w-1/2 rounded-xl border px-3 py-2 text-sm font-semibold`}
+                  >
+                    Multi-tarifs
+                  </button>
+                </div>
+                {!useTicketTypes && (
+                  <input
+                    type="number"
+                    placeholder="75"
+                    onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+                    className={inputClass}
+                  />
+                )}
               </div>
             </div>
+
+            {useTicketTypes && (
+              <div className="mt-6 space-y-4 rounded-2xl border border-pink-100 bg-white p-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-dusk">Types de billets</p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setTicketTypes((prev) => [
+                        ...prev,
+                        { label: "Nouveau billet", price: 0, quantity: form.capacity || 0, description: "" },
+                      ])
+                    }
+                    className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white"
+                  >
+                    ➕ Ajouter
+                  </button>
+                </div>
+
+                {ticketTypes.map((t, idx) => (
+                  <div key={idx} className="rounded-xl border border-dusk/10 bg-secondary p-4 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <input
+                        value={t.label}
+                        onChange={(e) => {
+                          const next = [...ticketTypes];
+                          next[idx].label = e.target.value;
+                          setTicketTypes(next);
+                        }}
+                        className={inputClass}
+                        placeholder="VIP, Early bird, Standard…"
+                      />
+                      {ticketTypes.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => setTicketTypes((prev) => prev.filter((_, i) => i !== idx))}
+                          className="text-sm text-red-500 hover:text-red-600"
+                        >
+                          Supprimer
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-dusk">Prix (€)</label>
+                        <input
+                          type="number"
+                          value={t.price}
+                          onChange={(e) => {
+                            const next = [...ticketTypes];
+                            next[idx].price = Number(e.target.value);
+                            setTicketTypes(next);
+                          }}
+                          className={inputClass}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-dusk">Quantité</label>
+                        <input
+                          type="number"
+                          value={t.quantity}
+                          onChange={(e) => {
+                            const next = [...ticketTypes];
+                            next[idx].quantity = Number(e.target.value);
+                            setTicketTypes(next);
+                          }}
+                          className={inputClass}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-dusk">Description (optionnel)</label>
+                        <input
+                          value={t.description}
+                          onChange={(e) => {
+                            const next = [...ticketTypes];
+                            next[idx].description = e.target.value;
+                            setTicketTypes(next);
+                          }}
+                          className={inputClass}
+                          placeholder="Accès coupe-file, boisson offerte…"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="rounded-3xl border border-pink-50 bg-white/95 p-6 shadow-lg shadow-primary/10">

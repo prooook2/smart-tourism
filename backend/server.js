@@ -7,10 +7,12 @@ import userRoutes from "./routes/userRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 import passport from "passport";
 import bodyParser from "body-parser";
 import { stripeWebhook } from "./controllers/paymentController.js";
 import recommendRoutes from "./routes/recommendRoutes.js";
+import { generalLimiter, authLimiter, paymentLimiter, createEventLimiter } from "./middleware/rateLimiter.js";
 
 
 
@@ -28,15 +30,15 @@ app.post("/api/payments/webhook", bodyParser.raw({ type: "application/json" }), 
 app.use(express.json());
 app.use(cors());
 
-
-// Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/events", eventRoutes);
+// Routes with specific rate limiters
+app.use("/api/auth", authLimiter, authRoutes);
+app.use("/api/users", generalLimiter, userRoutes);
+app.use("/api/admin", generalLimiter, adminRoutes);
+app.use("/api/events", generalLimiter, eventRoutes);
 app.use(passport.initialize());
-app.use("/api/payments", paymentRoutes);
-app.use("/api/recommend", recommendRoutes);
+app.use("/api/payments", paymentLimiter, paymentRoutes);
+app.use("/api/recommend", generalLimiter, recommendRoutes);
+app.use("/api/reviews", generalLimiter, reviewRoutes);
 
 
 // Basic test route

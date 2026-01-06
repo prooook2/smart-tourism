@@ -6,6 +6,7 @@ import LogoutButton from "../components/LogoutButton";
 
 const Dashboard = () => {
   const [users, setUsers] = useState([]);
+  const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user"));
@@ -19,19 +20,25 @@ const Dashboard = () => {
   }, [user, navigate]);
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/admin/users", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUsers(res.data);
+        const [usersRes, metricsRes] = await Promise.all([
+          axios.get("http://localhost:5000/api/admin/users", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get("http://localhost:5000/api/admin/metrics", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+        setUsers(usersRes.data);
+        setMetrics(metricsRes.data);
       } catch (error) {
-        toast.error("Impossible de charger les utilisateurs");
+        toast.error("Impossible de charger les données");
       } finally {
         setLoading(false);
       }
     };
-    fetchUsers();
+    fetchData();
   }, [token]);
 
   const handleDelete = async (id) => {
@@ -69,11 +76,20 @@ const Dashboard = () => {
       }
     });
     return [
-      { label: "Membres actifs", value: users.length },
-      { label: "Organisateurs", value: base.organisateur },
-      { label: "Visiteurs", value: base.visiteur },
+      { label: "Membres actifs", value: users.length, icon: "👥" },
+      { label: "Organisateurs", value: base.organisateur, icon: "🎭" },
+      { label: "Visiteurs", value: base.visiteur, icon: "🎫" },
     ];
   }, [users]);
+
+  const platformStats = useMemo(() => {
+    if (!metrics) return [];
+    return [
+      { label: "Billets vendus", value: metrics.ticketsSold, icon: "🎟️" },
+      { label: "Revenus totaux", value: `${metrics.totalRevenue.toFixed(2)} €`, icon: "💰" },
+      { label: "Taux de participation", value: `${metrics.participationRate}%`, icon: "📊" },
+    ];
+  }, [metrics]);
 
   if (loading) return <div className="text-center mt-20 text-dusk/60">Chargement...</div>;
 
@@ -97,6 +113,23 @@ const Dashboard = () => {
               <div key={stat.label} className="rounded-2xl border border-pink-50 bg-secondary p-4 shadow-md shadow-primary/10">
                 <p className="text-sm font-semibold text-dusk/70">{stat.label}</p>
                 <p className="mt-2 text-3xl font-bold text-primary">{stat.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-[32px] border border-white/60 bg-white/95 p-8 shadow-2xl shadow-primary/15 backdrop-blur">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Métriques de plateforme</p>
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            {platformStats.map((stat) => (
+              <div key={stat.label} className="rounded-2xl border border-pink-50 bg-secondary p-4 shadow-md shadow-primary/10">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{stat.icon}</span>
+                  <div>
+                    <p className="text-sm font-semibold text-dusk/70">{stat.label}</p>
+                    <p className="mt-1 text-2xl font-bold text-primary">{stat.value}</p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>

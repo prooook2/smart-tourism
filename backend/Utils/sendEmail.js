@@ -15,7 +15,7 @@ const sendEmail = async (to, subject, html, attachments) => {
     });
 
     const info = await transporter.sendMail({
-      from: `"Plateforme Culturelle" <${process.env.EMAIL_USER}>`,
+      from: `"Smart Tourism" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html,

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
 
 export default function RecommendedEvents() {
   const [list, setList] = useState([]);
@@ -20,14 +19,10 @@ export default function RecommendedEvents() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {list.map(e => (
-          <Link
-            key={e._id}
-            to={`/events/${e._id}`}
-            className="p-3 border rounded shadow bg-white hover:-translate-y-1 hover:shadow-md transition block"
-          >
+          <div key={e._id} className="p-3 border rounded shadow">
             <h3 className="font-bold">{e.title}</h3>
-            <p className="text-sm text-gray-600">{e.location?.city || "Ville à définir"}</p>
-          </Link>
+            <p className="text-sm">{e.location?.city}</p>
+          </div>
         ))}
       </div>
     </div>

@@ -1,6 +1,10 @@
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import RecommendedEvents from "../components/RecommendedEvents";
+import HeroSection from "../components/HeroSection";
+import EventList from "../components/EventList";
+
 
 const HomePage = () => {
   const [events, setEvents] = useState([]);
@@ -185,6 +189,16 @@ const HomePage = () => {
               </p>
             )}
           </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8">
+        <div>
+          <HeroSection />
+          <EventList />
+          <RecommendedEvents />
+
+          
         </div>
       </section>
 

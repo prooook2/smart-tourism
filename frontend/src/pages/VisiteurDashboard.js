@@ -27,6 +27,18 @@ const VisiteurDashboard = () => {
       action: () => navigate("/profile"),
       actionLabel: "Voir mon profil",
     },
+    {
+      title: "Mes événements",
+      description: "Consulter les événements auxquels vous êtes inscrit.",
+      action: () => navigate("/my-events"),
+      actionLabel: "Voir mes inscriptions",
+    },
+    {
+      title: "Coups de cœur",
+      description: "Retrouvez tous vos événements favoris sauvegardés.",
+      action: () => navigate("/saved-events"),
+      actionLabel: "Voir mes favoris",
+    },
   ];
 
   return (

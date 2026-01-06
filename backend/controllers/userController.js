@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import Event from "../models/Event.js";
+import Ticket from "../models/Ticket.js";
 
 
 // 🟢 GET USER PROFILE
@@ -65,7 +66,7 @@ export const updateUserRole = async (req, res) => {
     const { id } = req.params;
     const { role } = req.body;
 
-    const validRoles = ["tourist", "guide", "partner", "admin"];
+    const validRoles = ["admin", "organisateur", "visiteur"];
     if (!validRoles.includes(role)) {
       return res.status(400).json({ message: "Invalid role" });
     }
@@ -125,6 +126,66 @@ export const getMyEvents = async (req, res) => {
     res.json({ organized, registered });
   } catch (err) {
     console.error("getMyEvents error:", err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+
+// Get dashboard metrics for organizer
+export const getOrganizerMetrics = async (req, res) => {
+  try {
+    const organizerId = req.user.id;
+
+    // Get all events organized by this user
+    const events = await Event.find({ organizer: organizerId });
+    const eventIds = events.map((e) => e._id);
+
+    // Get all tickets sold for these events
+    const tickets = await Ticket.find({ event: { $in: eventIds } });
+
+    // Calculate metrics
+    const ticketsSold = tickets.length;
+    const totalRevenue = tickets.reduce((sum, t) => sum + (t.pricePaid || 0), 0);
+    const totalCapacity = events.reduce((sum, e) => sum + (e.capacity || 0), 0);
+    const totalAttendees = events.reduce((sum, e) => sum + (e.attendees?.length || 0), 0);
+    const participationRate = totalCapacity > 0 ? ((totalAttendees / totalCapacity) * 100).toFixed(1) : 0;
+
+    res.json({
+      ticketsSold,
+      totalRevenue,
+      participationRate,
+      totalEvents: events.length,
+      totalCapacity,
+      totalAttendees,
+    });
+  } catch (err) {
+    console.error("getOrganizerMetrics error:", err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+
+// Get platform-wide metrics for admin
+export const getAdminMetrics = async (req, res) => {
+  try {
+    const allEvents = await Event.find();
+    const allTickets = await Ticket.find();
+    const allUsers = await User.find();
+
+    const ticketsSold = allTickets.length;
+    const totalRevenue = allTickets.reduce((sum, t) => sum + (t.pricePaid || 0), 0);
+    const totalCapacity = allEvents.reduce((sum, e) => sum + (e.capacity || 0), 0);
+    const totalAttendees = allEvents.reduce((sum, e) => sum + (e.attendees?.length || 0), 0);
+    const participationRate = totalCapacity > 0 ? ((totalAttendees / totalCapacity) * 100).toFixed(1) : 0;
+
+    res.json({
+      ticketsSold,
+      totalRevenue,
+      participationRate,
+      totalEvents: allEvents.length,
+      totalUsers: allUsers.length,
+      totalAttendees,
+    });
+  } catch (err) {
+    console.error("getAdminMetrics error:", err);
     res.status(500).json({ message: "Erreur serveur" });
   }
 };

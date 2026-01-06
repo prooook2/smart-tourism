@@ -7,6 +7,7 @@ import OrganisateurDashboard from "./pages/OrganisateurDashboard";
 import VisiteurDashboard from "./pages/VisiteurDashboard";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Footer from "./components/Footer";
 import { Toaster } from "react-hot-toast";
 import HomePage from "./pages/HomePage";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -18,6 +19,9 @@ import EventDetails from "./pages/EventDetails";
 import EventEdit from "./pages/EventEdit";
 import SuccessPage from "./pages/SuccessPage";
 import CancelPage from "./pages/CancelPage";
+import RecommendedEvents from "./pages/RecommendedEvents";
+import MyEvents from "./pages/MyEvents";
+import SavedEvents from "./pages/SavedEvents";
 
 function App() {
   return (
@@ -35,6 +39,14 @@ function App() {
         <Route path="/google-success" element={<GoogleSuccess />} />
         <Route path="/events" element={<EventList />} />
         <Route path="/events/:id" element={<EventDetails />} />
+        <Route
+          path="/recommend"
+          element={
+            <ProtectedRoute>
+              <RecommendedEvents />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Protected routes */}
         <Route
@@ -42,6 +54,24 @@ function App() {
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/my-events"
+          element={
+            <ProtectedRoute>
+              <MyEvents />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/saved-events"
+          element={
+            <ProtectedRoute>
+              <SavedEvents />
             </ProtectedRoute>
           }
         />
@@ -83,17 +113,9 @@ function App() {
         />
 
         <Route
-          path="/events/create"
-          element={
-            <ProtectedRoute roles={["organisateur", "admin"]}>
-              <EventCreate />
-            </ProtectedRoute>
-          }
-        />
-         <Route
           path="/events/:id/edit"
           element={
-            <ProtectedRoute roles={["organisateur", "admin"]}>
+            <ProtectedRoute allowedRoles={["organisateur", "admin"]}>
               <EventEdit />
             </ProtectedRoute>
           }
@@ -101,12 +123,9 @@ function App() {
         
         <Route path="/payment/success" element={<SuccessPage />} />
         <Route path="/cancel" element={<CancelPage />} />
-  
-        
-       
-
-
       </Routes>
+
+      <Footer />
     </Router>
   );
 }

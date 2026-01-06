@@ -1,12 +1,35 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
+  const token = localStorage.getItem("token");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [priceRange, setPriceRange] = useState("");
+  const [showSearchPanel, setShowSearchPanel] = useState(false);
 
   const logout = () => {
     localStorage.clear();
     navigate("/");
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (searchTerm.trim()) {
+      params.append("q", searchTerm.trim());
+    }
+
+    // Map price range selection to min/max
+    if (priceRange) {
+      const [min, max] = priceRange.split("-");
+      if (min) params.append("minPrice", min);
+      if (max) params.append("maxPrice", max);
+    }
+
+    navigate(`/events?${params.toString()}`);
+    setShowSearchPanel(false);
   };
 
   const roleDashboard = {
@@ -35,12 +58,32 @@ const Navbar = () => {
           <Link to="/events" className="hover:text-primary transition-colors">
             Événements
           </Link>
-          <Link to="/register" className="hover:text-primary transition-colors">
-            Inscription
-          </Link>
-          <Link to="/login" className="hover:text-primary transition-colors">
-            Connexion
-          </Link>
+          <button
+            onClick={() => setShowSearchPanel(!showSearchPanel)}
+            className="hover:text-primary transition-colors flex items-center gap-1"
+          >
+            🔍 Chercher
+          </button>
+          {token && (
+            <>
+              <Link to="/my-events" className="hover:text-primary transition-colors">
+                Mes événements
+              </Link>
+              <Link to="/saved-events" className="hover:text-primary transition-colors">
+                ❤️ Favoris
+              </Link>
+            </>
+          )}
+         {!token && (
+          <>
+            <Link to="/register" className="hover:text-primary transition-colors">
+              Inscription
+            </Link>
+            <Link to="/login" className="hover:text-primary transition-colors">
+              Connexion
+            </Link>
+          </>
+        )}
         </div>
 
         <div className="flex items-center gap-3">
@@ -84,6 +127,45 @@ const Navbar = () => {
           )}
         </div>
       </div>
+
+      {/* Search Panel */}
+      {showSearchPanel && (
+        <div className="border-t border-pink-50 bg-white/50 backdrop-blur px-4 py-4 md:px-6">
+          <form onSubmit={handleSearch} className="mx-auto max-w-6xl">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  placeholder="Rechercher par mot-clé ou ville"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full rounded-full border border-dusk/10 bg-white/80 px-4 py-3 pl-11 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
+                />
+                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-dusk/40">🔍</span>
+              </div>
+
+              <select
+                value={priceRange}
+                onChange={(e) => setPriceRange(e.target.value)}
+                className="rounded-full border border-dusk/10 bg-white/80 px-4 py-3 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
+              >
+                <option value="">Prix: Tous</option>
+                <option value="0-20">0 - 20 €</option>
+                <option value="20-50">20 - 50 €</option>
+                <option value="50-100">50 - 100 €</option>
+                <option value="100-">100 € et +</option>
+              </select>
+
+              <button
+                type="submit"
+                className="rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5"
+              >
+                Chercher
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </nav>
   );
 };
