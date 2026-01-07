@@ -7,8 +7,6 @@ import { categories } from "../utils/categories";
 const inputClass =
   "w-full rounded-2xl border border-pink-100 bg-white px-4 py-3 text-sm text-ink outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30";
 
-// Categories are now centralized in ../utils/categories
-
 export default function EventEdit() {
   const { id } = useParams();
   const [form, setForm] = useState(null);

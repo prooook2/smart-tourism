@@ -12,7 +12,6 @@ const Dashboard = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
 
-  // Redirect if not admin
   useEffect(() => {
     if (!user || user.role !== "admin") {
       navigate("/");

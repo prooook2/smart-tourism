@@ -99,7 +99,6 @@ const [events, setEvents] = useState({
     <div className="flex flex-col items-center min-h-screen bg-gray-100 p-6">
       <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-lg">
         
-              {/* Avatar Section */}
       <div className="flex flex-col items-center mb-6">
         <div className="w-28 h-28 rounded-full bg-gray-200 shadow-inner overflow-hidden flex items-center justify-center">
           {user.avatar ? (
@@ -110,7 +109,6 @@ const [events, setEvents] = useState({
 
         </div>
 
-        {/* Upload button */}
         <label className="mt-2 cursor-pointer flex items-center gap-1 text-indigo-600 font-semibold hover:underline">
         <span className="text-lg">+</span> Ajouter une photo
         <input
@@ -147,7 +145,6 @@ const [events, setEvents] = useState({
           Déconnexion
         </button>
 
-        {/* Events section preview */}
         <h3 className="mt-6 text-xl font-bold">Mes événements inscrits</h3>
 
             {events.registered.length === 0 ? (

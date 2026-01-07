@@ -9,7 +9,6 @@ export default function SavedEvents() {
     if (!user?._id) return;
     const key = `saved-events-${user._id}`;
     const savedIds = JSON.parse(localStorage.getItem(key) || "[]");
-    // For MVP, only store IDs; display minimal info
     setSaved(savedIds);
   }, [user._id]);
 

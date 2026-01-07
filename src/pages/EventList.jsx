@@ -20,7 +20,6 @@ export default function EventList() {
     load();
   }, []);
 
-  // 🗑️ Delete event
   const handleDelete = async (id) => {
     if (!window.confirm("Voulez-vous vraiment supprimer cet événement ?")) return;
 
@@ -45,7 +44,6 @@ export default function EventList() {
           events.map((e) => (
             <div key={e._id} className="bg-white p-4 rounded shadow">
   
-          {/* IMAGE */}
           {e.image && (
             <img
               src={e.image}

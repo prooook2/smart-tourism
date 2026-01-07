@@ -18,7 +18,6 @@ export default function EventDetails() {
         const res = await axios.get(`http://localhost:5000/api/events/${id}`);
         setEvent(res.data.event);
 
-        // If backend populates attendees, check if user is among them
         if (token && res.data.event.attendees?.some(a => a._id === user._id)) {
           setRegistered(true);
         }
@@ -110,7 +109,6 @@ export default function EventDetails() {
         </p>
       )}
 
-      {/* 🧑 Liste des participants */}
       <div className="mt-8 border-t pt-4">
         <h3 className="text-lg font-semibold mb-2">Participants inscrits</h3>
         {event.attendees && event.attendees.length > 0 ? (

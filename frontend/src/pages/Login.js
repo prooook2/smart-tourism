@@ -13,7 +13,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  // 🔹 Normal login
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -39,12 +38,10 @@ const Login = () => {
     }
   };
 
-  // 🔹 Google login
   const handleGoogleLogin = () => {
     window.location.href = "http://localhost:5000/api/auth/google";
   };
 
-  // 🔹 Handle redirect back from Google
   useEffect(() => {
     const token = new URLSearchParams(window.location.search).get("token");
   if (!token) return;
@@ -70,7 +67,6 @@ const Login = () => {
     }
   };
 
-  // Prevent re-run in Strict Mode
   if (!sessionStorage.getItem("googleLoginHandled")) {
     sessionStorage.setItem("googleLoginHandled", "true");
     fetchUser();

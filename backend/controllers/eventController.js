@@ -1,18 +1,13 @@
-// backend/controllers/eventController.js
 import Event from "../models/Event.js";
 import User from "../models/User.js";
 import Review from "../models/Review.js";
 import sendEmail from "../Utils/sendEmail.js";
 import { invalidateCache } from "../middleware/cacheMiddleware.js";
 
-
-// Create event (organiser or admin)
 export const createEvent = async (req, res) => {
   try {
     let data = req.body;
 
-    // Parse location JSON
-    // Fix location coming from FormData
    if (data.location) {
       try {
         data.location = JSON.parse(data.location);
@@ -33,7 +28,6 @@ export const createEvent = async (req, res) => {
         }
       }
 
-    // Parse ticketing options (FormData string or array)
     if (data.ticketTypes) {
       try {
         const parsed = Array.isArray(data.ticketTypes) ? data.ticketTypes : JSON.parse(data.ticketTypes);
@@ -60,20 +54,17 @@ export const createEvent = async (req, res) => {
       }
     }
 
-    // Set organiser to logged user
     data.organizer = req.user.id;
     data.price = Number(data.price || 0);
     if (data.time) data.time = data.time.trim();
     if (data.duration) data.duration = Number(data.duration) || 90;
 
-    // Save image if uploaded
     if (req.file) {
-  data.image = req.file.path;  // Cloudinary returns uploaded URL here
+  data.image = req.file.path;
 }
 
     const event = await Event.create(data);
     
-    // Invalidate cache when new event is created
     invalidateCache("/api/events");
 
     res.status(201).json({ event });
@@ -83,8 +74,6 @@ export const createEvent = async (req, res) => {
   }
 };
 
-
-// List events (with simple filters & pagination)
 export const listEvents = async (req, res) => {
   try {
     const { page = 1, limit = 10, q, category, city, upcoming } = req.query;
@@ -92,7 +81,6 @@ export const listEvents = async (req, res) => {
 
     const trimmedQ = q?.trim();
 
-    // Text search across multiple fields
     if (trimmedQ) {
       const regex = new RegExp(trimmedQ, "i");
       filters.$or = [
@@ -106,7 +94,6 @@ export const listEvents = async (req, res) => {
     if (category) filters.category = category;
     if (city) filters["location.city"] = city;
 
-    // Price range filters
     let priceFilter = null;
     const minPrice = req.query.minPrice ? Number(req.query.minPrice) : null;
     const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : null;
@@ -131,7 +118,6 @@ export const listEvents = async (req, res) => {
       .skip(Number(skip))
       .limit(Number(limit));
 
-    // Attach average rating to each event
     events = await Promise.all(
       events.map(async (e) => {
         const reviews = await Review.find({ event: e._id });
@@ -147,7 +133,6 @@ export const listEvents = async (req, res) => {
   }
 };
 
-// Get single event
 export { getEventById as getEvent };
 
 export const getEventById = async (req, res) => {
@@ -163,20 +148,17 @@ export const getEventById = async (req, res) => {
   }
 };
 
-// Update event (only organiser or admin)
 export const updateEvent = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
     if (!event) return res.status(404).json({ message: "Événement introuvable" });
 
-    // only organiser or admin
     if (req.user.role !== "admin" && event.organizer.toString() !== req.user.id) {
       return res.status(403).json({ message: "Non autorisé à modifier cet événement" });
     }
 
     let data = req.body;
 
-    // Parse structured fields
     if (data.location) {
       try {
         data.location = JSON.parse(data.location);
@@ -185,7 +167,6 @@ export const updateEvent = async (req, res) => {
       }
     }
 
-    // Ticket types update (accept JSON string or array)
     if (data.ticketTypes) {
       try {
         const parsed = Array.isArray(data.ticketTypes) ? data.ticketTypes : JSON.parse(data.ticketTypes);
@@ -219,7 +200,6 @@ export const updateEvent = async (req, res) => {
     if (data.time) data.time = data.time.trim();
     if (data.duration) data.duration = Number(data.duration) || 90;
 
-    // If image uploaded
     if (req.file) {
       data.image = req.file.path;
     }
@@ -227,7 +207,6 @@ export const updateEvent = async (req, res) => {
     Object.assign(event, data);
     await event.save();
 
-    // Invalidate cache after update
     invalidateCache("/api/events");
 
     res.json({ message: "Événement mis à jour", event });
@@ -237,9 +216,6 @@ export const updateEvent = async (req, res) => {
   }
 };
 
-
-// Delete event
-// controllers/eventController.js
 export const deleteEvent = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id)
@@ -249,12 +225,10 @@ export const deleteEvent = async (req, res) => {
       return res.status(404).json({ message: "Événement introuvable" });
     }
 
-    // Permission check
     if (req.user.role !== "admin" && event.organizer.toString() !== req.user.id) {
       return res.status(403).json({ message: "Accès refusé" });
     }
 
-    // Send email to all attendees
     for (const attendee of event.attendees) {
       if (!attendee.email) continue;
 
@@ -273,7 +247,6 @@ export const deleteEvent = async (req, res) => {
 
     await Event.findByIdAndDelete(event._id);
 
-    // Invalidate cache after delete
     invalidateCache("/api/events");
 
     res.json({ message: "Événement supprimé et participants notifiés" });
@@ -284,7 +257,6 @@ export const deleteEvent = async (req, res) => {
   }
 };
 
-// 🟢 Register for event
 export const registerForEvent = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
@@ -292,7 +264,6 @@ export const registerForEvent = async (req, res) => {
 
     const { ticketTypeId } = req.body || {};
 
-    // Ticketed events: only free ticket types can be registered directly (paid go through checkout)
     if (event.ticketTypes?.length) {
       if (!ticketTypeId) {
         return res.status(400).json({ message: "Choisissez un type de billet" });
@@ -315,12 +286,10 @@ export const registerForEvent = async (req, res) => {
       ticketType.sold = (ticketType.sold || 0) + 1;
     }
 
-    // Check if already registered
     if (event.attendees.includes(req.user.id)) {
       return res.status(400).json({ message: "Déjà inscrit à cet événement" });
     }
 
-    // Check capacity
     if (event.attendees.length >= event.capacity) {
       return res.status(400).json({ message: "Capacité maximale atteinte" });
     }
@@ -335,7 +304,6 @@ export const registerForEvent = async (req, res) => {
   }
 };
 
-// 🔴 Cancel registration
 export const cancelRegistration = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
@@ -347,7 +315,6 @@ export const cancelRegistration = async (req, res) => {
       return res.status(400).json({ message: "Non inscrit à cet événement" });
     }
 
-    // Free up stock when ticket types exist
     if (event.ticketTypes?.length) {
       let ticketType = ticketTypeId ? event.ticketTypes.id(ticketTypeId) : null;
       if (!ticketType) {

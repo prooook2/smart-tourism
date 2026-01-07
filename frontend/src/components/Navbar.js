@@ -14,7 +14,6 @@ const Navbar = () => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
@@ -37,7 +36,6 @@ const Navbar = () => {
       params.append("q", searchTerm.trim());
     }
 
-    // Map price range selection to min/max
     if (priceRange) {
       const [min, max] = priceRange.split("-");
       if (min) params.append("minPrice", min);
@@ -57,13 +55,15 @@ const Navbar = () => {
   return (
     <nav className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-pink-50 shadow-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 lg:px-6">
-        <Link to="/" className="flex items-center gap-2 font-semibold text-ink">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-            ✦
-          </span>
+        <Link to="/" className="flex items-center gap-3 font-semibold text-ink">
+          <img 
+            src="/globecult-logo.png" 
+            alt="GLOBECULT" 
+            className="h-12 w-12 object-contain"
+          />
           <div className="leading-tight">
-            <p className="text-base uppercase tracking-[0.2em] text-dusk">Smart</p>
-            <p className="text-lg text-primary">Tourism</p>
+            <p className="text-xl font-bold uppercase tracking-wider text-[#1a3a5c]">GLOBECULT</p>
+            <p className="text-xs tracking-wide text-[#2a7ab0]">Explore. Discover. Connect.</p>
           </div>
         </Link>
 
@@ -124,7 +124,6 @@ const Navbar = () => {
                 </svg>
               </button>
 
-              {/* Dropdown Menu */}
               {showProfileMenu && (
                 <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-dusk/10 bg-white shadow-xl">
                   <div className="p-3 border-b border-dusk/5">
@@ -225,7 +224,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Search Panel */}
       {showSearchPanel && (
         <div className="border-t border-pink-50 bg-white/50 backdrop-blur px-4 py-4 md:px-6">
           <form onSubmit={handleSearch} className="mx-auto max-w-6xl">

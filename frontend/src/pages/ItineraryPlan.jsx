@@ -128,10 +128,6 @@ const ItineraryPlan = () => {
             <label className="text-xs text-dusk">{t("itinerary.duration")}
               <input name="defaultEventDurationMinutes" value={form.defaultEventDurationMinutes} onChange={handleChange} type="number" min="15" className="mt-1 w-full rounded-lg border border-dusk/20 px-3 py-2 text-sm" />
             </label>
-            {/* <label className="col-span-2 flex items-center gap-2 text-xs text-dusk">
-             <input type="checkbox" name="cityOnly" checked={form.cityOnly} onChange={handleChange} />
-              Restreindre à ma ville
-            </label> */}
             <label className="col-span-2 flex items-center gap-2 text-xs text-dusk">
               <input type="checkbox" name="strictFilters" checked={form.strictFilters} onChange={handleChange} />
               {t("itinerary.strictFilters")}

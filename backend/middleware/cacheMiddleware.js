@@ -1,12 +1,9 @@
-// Simple in-memory cache for API responses (no Redis dependency)
-
 class Cache {
   constructor() {
     this.store = new Map();
   }
 
   set(key, value, ttlMs = 30000) {
-    // Default 30 seconds TTL
     this.store.set(key, {
       value,
       expiresAt: Date.now() + ttlMs,
@@ -36,10 +33,8 @@ class Cache {
 
 export const cache = new Cache();
 
-// Middleware to cache GET requests
 export const cacheMiddleware = (ttlMs = 30000) => {
   return (req, res, next) => {
-    // Only cache GET requests
     if (req.method !== "GET") {
       return next();
     }
@@ -63,7 +58,6 @@ export const cacheMiddleware = (ttlMs = 30000) => {
   };
 };
 
-// Invalidate cache when data changes
 export const invalidateCache = (pattern) => {
   for (const key of cache.store.keys()) {
     if (key.includes(pattern)) {

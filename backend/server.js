@@ -22,15 +22,12 @@ const app = express();
 
 
 
-// 🔥 Stripe webhook MUST come BEFORE express.json()
 app.post("/api/payments/webhook", express.raw({ type: "application/json" }), stripeWebhook);
 
 
-// JSON body parser (AFTER webhook)
 app.use(express.json());
 app.use(cors());
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
@@ -42,13 +39,10 @@ app.use("/api/itinerary", itineraryRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/notifications", notificationRoutes);
 
-
-// Basic test route
 app.get("/", (req, res) => {
   res.send("Smart Cultural & Tourism Platform API is running...");
 });
 
-// MongoDB
 const mongoUri = process.env.MONGO_URI || "";
 if (mongoUri) {
   mongoose

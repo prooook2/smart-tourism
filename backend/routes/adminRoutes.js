@@ -5,7 +5,6 @@ import { getAllUsers, updateUserRole, deleteUser, getAdminMetrics } from "../con
 
 const router = express.Router();
 
-// All admin-only routes
 router.get("/users", verifyToken, authorizeRoles("admin"), getAllUsers);
 router.put("/users/:id/role", verifyToken, authorizeRoles("admin"), updateUserRole);
 router.delete("/users/:id", verifyToken, authorizeRoles("admin"), deleteUser);

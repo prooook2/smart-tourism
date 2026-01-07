@@ -1,11 +1,9 @@
-// backend/controllers/authController.js
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import User from "../models/User.js";
 import sendEmail from "../Utils/sendEmail.js";
 
-// 🔹 Register new user
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -34,7 +32,6 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// 🔹 Login user
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -62,7 +59,6 @@ export const loginUser = async (req, res) => {
   }
 };
 
-// 🔹 Forgot Password
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -71,7 +67,6 @@ export const forgotPassword = async (req, res) => {
     if (!user)
       return res.status(404).json({ message: "Aucun utilisateur trouvé avec cet email" });
 
-    // Generate token and expiry
     const resetToken = crypto.randomBytes(32).toString("hex");
     user.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
     user.resetPasswordExpire = Date.now() + 60 * 60 * 1000; // 1h
@@ -99,7 +94,6 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
-// 🔹 Reset Password
 export const resetPassword = async (req, res) => {
   try {
     const { token } = req.params;

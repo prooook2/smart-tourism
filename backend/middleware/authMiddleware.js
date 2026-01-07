@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-// ✅ Verify JWT and attach user object to req
 export const verifyToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
@@ -24,7 +23,6 @@ export const verifyToken = async (req, res, next) => {
   }
 };
 
-// ✅ Role-based authorization middleware
 export const authorizeRoles = (...roles) => {
   return (req, res, next) => {
     if (!req.user) return res.status(401).json({ message: "Unauthorized" });

@@ -3,8 +3,6 @@ import bcrypt from "bcryptjs";
 import Event from "../models/Event.js";
 import Ticket from "../models/Ticket.js";
 
-
-// 🟢 GET USER PROFILE
 export const getUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
@@ -16,7 +14,6 @@ export const getUserProfile = async (req, res) => {
   }
 };
 
-// 🟡 UPDATE USER PROFILE
 export const updateUserProfile = async (req, res) => {
   try {
     const { name, email, password, city, interests, budgetMin, budgetMax, coords } = req.body;
@@ -61,7 +58,6 @@ export const updateUserProfile = async (req, res) => {
   }
 };
 
-// 🟢 ADMIN: Get all users
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find().select("-password");
@@ -71,7 +67,6 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-// 🟡 ADMIN: Update a user’s role
 export const updateUserRole = async (req, res) => {
   try {
     const { id } = req.params;
@@ -94,7 +89,6 @@ export const updateUserRole = async (req, res) => {
   }
 };
 
-// 🔴 ADMIN: Delete user
 export const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -141,19 +135,15 @@ export const getMyEvents = async (req, res) => {
   }
 };
 
-// Get dashboard metrics for organizer
 export const getOrganizerMetrics = async (req, res) => {
   try {
     const organizerId = req.user.id;
 
-    // Get all events organized by this user
     const events = await Event.find({ organizer: organizerId });
     const eventIds = events.map((e) => e._id);
 
-    // Get all tickets sold for these events
     const tickets = await Ticket.find({ event: { $in: eventIds } });
 
-    // Calculate metrics
     const ticketsSold = tickets.length;
     const totalRevenue = tickets.reduce((sum, t) => sum + (t.pricePaid || 0), 0);
     const totalCapacity = events.reduce((sum, e) => sum + (e.capacity || 0), 0);
@@ -174,7 +164,6 @@ export const getOrganizerMetrics = async (req, res) => {
   }
 };
 
-// Get platform-wide metrics for admin
 export const getAdminMetrics = async (req, res) => {
   try {
     const allEvents = await Event.find();

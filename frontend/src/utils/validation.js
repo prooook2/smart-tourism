@@ -1,5 +1,3 @@
-// Form validation helpers with user-friendly messages
-
 export const validators = {
   email: (value) => {
     if (!value) return "Email requis";
@@ -44,7 +42,6 @@ export const validators = {
   },
 };
 
-// Hook to manage form state with validation
 export const useFormValidation = (initialValues, onSubmit) => {
   const [values, setValues] = React.useState(initialValues);
   const [errors, setErrors] = React.useState({});
@@ -63,7 +60,6 @@ export const useFormValidation = (initialValues, onSubmit) => {
 
   const validate = (vals) => {
     const newErrors = {};
-    // Custom validation logic can go here
     return newErrors;
   };
 

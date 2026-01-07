@@ -10,7 +10,6 @@ import SaveEventButton from "../components/SaveEventButton";
 import EventReviewSection from "../components/EventReviewSection";
 import { sendEventNotification } from "../utils/notifications";
 
-// Fix Leaflet icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
@@ -38,7 +37,6 @@ export default function EventDetails() {
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-  // Load event
   useEffect(() => {
     async function loadEvent() {
       try {
@@ -52,7 +50,6 @@ export default function EventDetails() {
           setSelectedTicketId(firstAvailable?._id || res.data.event.ticketTypes[0]._id);
         }
 
-        // If user already registered
         if (token && res.data.event.attendees?.some(a => a._id === user._id)) {
           setRegistered(true);
         }
@@ -65,7 +62,6 @@ export default function EventDetails() {
     loadEvent();
   }, [id, token, user._id]);
 
-  // Register for FREE event
   const handleRegister = async () => {
     if (event.ticketTypes?.length && !selectedTicketId) {
       toast.error(t("events.chooseTicket"));
@@ -85,7 +81,6 @@ export default function EventDetails() {
     }
   };
 
-  // Cancel registration
   const handleCancel = async () => {
     try {
       await axios.post(
@@ -104,7 +99,6 @@ export default function EventDetails() {
     }
   };
 
-  // Stripe payment
   const handlePayment = async () => {
     if (event.ticketTypes?.length && !selectedTicketId) {
       toast.error(t("events.chooseTicket"));
@@ -232,7 +226,6 @@ export default function EventDetails() {
   {token ? (
     isPaidEvent ? (
       registered ? (
-        // Already paid → can cancel
         <button
           onClick={handleCancel}
           className="rounded-full border border-red-200 px-6 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
@@ -240,7 +233,6 @@ export default function EventDetails() {
           {t("events.cancel")}
         </button>
       ) : isFull ? (
-        // Paid event but full → disable button
         <button
           disabled
           className="rounded-full bg-gray-400 px-6 py-3 text-sm font-semibold text-white cursor-not-allowed"
@@ -248,7 +240,6 @@ export default function EventDetails() {
           {t("events.full")}
         </button>
       ) : (
-        // Paid event & not registered & not full → buy ticket
         <button
           onClick={handlePayment}
           className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5"
@@ -257,7 +248,6 @@ export default function EventDetails() {
         </button>
       )
       ) : registered ? (
-        // FREE event → already registered
         <button
           onClick={handleCancel}
           className="rounded-full border border-red-200 px-6 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
@@ -265,7 +255,6 @@ export default function EventDetails() {
           {t("events.cancel")}
         </button>
       ) : isFull ? (
-        // Free event but full → block
         <button
           disabled
           className="rounded-full bg-gray-400 px-6 py-3 text-sm font-semibold text-white cursor-not-allowed"
@@ -273,7 +262,6 @@ export default function EventDetails() {
           {t("events.full")}
         </button>
       ) : (
-        // Free event & not full → allow register
         <button
           onClick={handleRegister}
           className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5"

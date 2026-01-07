@@ -23,7 +23,6 @@ function App() {
       <Navbar />
 
       <Routes>
-        {/* Public routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -33,7 +32,6 @@ function App() {
         <Route path="/events" element={<EventList />} />
         <Route path="/events/:id" element={<EventDetails />} />
 
-        {/* Protected routes */}
         <Route
           path="/profile"
           element={

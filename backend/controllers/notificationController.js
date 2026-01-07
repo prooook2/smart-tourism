@@ -8,7 +8,6 @@ const TYPE_LABELS = {
   cancellation: "Annulation",
 };
 
-// Send a notification email to attendees (and optionally saved users) of an event
 export const sendEventNotification = async (req, res) => {
   try {
     const { type = "update", message, title, includeSaved = false } = req.body || {};
@@ -28,7 +27,6 @@ export const sendEventNotification = async (req, res) => {
       return res.status(404).json({ message: "Événement introuvable" });
     }
 
-    // Only the event organiser or an admin can notify
     if (req.user.role !== "admin" && event.organizer?._id?.toString() !== req.user.id) {
       return res.status(403).json({ message: "Vous ne pouvez notifier que vos propres événements" });
     }
@@ -108,7 +106,6 @@ export const sendEventNotification = async (req, res) => {
   }
 };
 
-// List notifications for the authenticated user (basic feed)
 export const listMyNotifications = async (req, res) => {
   try {
     const limit = Math.min(Number(req.query.limit) || 50, 100);

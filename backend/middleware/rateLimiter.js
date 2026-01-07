@@ -1,4 +1,3 @@
-// Rate limiting middleware for API protection
 import rateLimit from "express-rate-limit";
 
 export const generalLimiter = rateLimit({

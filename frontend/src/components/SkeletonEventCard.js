@@ -1,4 +1,3 @@
-// Skeleton card placeholder for EventList
 export default function SkeletonEventCard() {
   return (
     <article className="flex h-full flex-col rounded-3xl border border-pink-50 bg-white/95 shadow-lg shadow-primary/10 animate-pulse">

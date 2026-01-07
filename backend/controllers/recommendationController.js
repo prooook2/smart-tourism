@@ -1,6 +1,5 @@
 import Event from "../models/Event.js";
 
-// Haversine distance helper
 const toRad = (v) => (v * Math.PI) / 180;
 const haversine = (lat1, lon1, lat2, lon2) => {
   const R = 6371; // km
@@ -24,9 +23,7 @@ export const recommendEvents = async (req, res) => {
       filters["location.city"] = user.city;
     }
 
-    // Apply budget preferences - simpler approach
     if (typeof user.budgetMax === "number" && user.budgetMax > 0) {
-      // Filter by price OR minPrice being within budget
       filters.$or = [
         { price: { $lte: user.budgetMax } },
         { minPrice: { $lte: user.budgetMax } }
@@ -37,7 +34,6 @@ export const recommendEvents = async (req, res) => {
       .sort({ date: 1 })
       .limit(100);
 
-    // If user has coords, compute distance to each event and sort by proximity
     let recommended = initial;
     if (user?.coords && typeof user.coords.lat === 'number' && typeof user.coords.lng === 'number') {
       recommended = initial
@@ -63,10 +59,8 @@ export const recommendEvents = async (req, res) => {
       recommended = initial.slice(0, 6);
     }
 
-    // Fallback if nothing matches: relax filters (remove city and interests)
     if (recommended.length === 0) {
       const relaxedFilters = {};
-      // Keep budget filter only
       if (filters.$or) relaxedFilters.$or = filters.$or;
 
       const fbInitial = await Event.find(relaxedFilters)

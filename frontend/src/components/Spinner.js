@@ -1,4 +1,3 @@
-// Reusable spinner component
 export default function Spinner({ size = "md", label = "Chargement..." }) {
   const sizeClasses = {
     sm: "h-4 w-4",

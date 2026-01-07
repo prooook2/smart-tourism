@@ -160,7 +160,6 @@ export default function EventList() {
 
                     <h3 className="mt-3 text-2xl font-semibold text-ink">{e.title}</h3>
 
-                    {/* Organizer Info */}
                     {e.organizer && (
                       <div className="mt-2 text-xs text-dusk/60">
                         👤 {e.organizer.name || t("nav.dashboard")}
@@ -171,7 +170,6 @@ export default function EventList() {
                       {e.description?.slice(0, 140) || t("events.description")}
                     </p>
 
-                    {/* Info Badges Row */}
                     <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-pink-100 pt-3 text-xs font-semibold">
                       <span className="inline-block rounded-full bg-orange-50 px-2.5 py-1 text-orange-700">
                         {timeIndicator}

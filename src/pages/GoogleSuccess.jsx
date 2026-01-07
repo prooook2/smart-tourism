@@ -17,7 +17,6 @@ const GoogleSuccess = () => {
       }
 
       try {
-        // 🔹 Get user info from backend using token
         const res = await axios.get("http://localhost:5000/api/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -29,7 +28,6 @@ const GoogleSuccess = () => {
 
  
         
-        // ✅ Redirect based on user role
         setTimeout(() => {
             
 

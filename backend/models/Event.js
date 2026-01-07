@@ -1,4 +1,3 @@
-// backend/models/Event.js
 import mongoose from "mongoose";
 
 const eventSchema = new mongoose.Schema(
@@ -16,14 +15,12 @@ const eventSchema = new mongoose.Schema(
       },
     },
 
-    // Legacy flat price kept for compatibility and quick filters
     price: {
       type: Number,
       default: 0,
       min: 0,
     },
 
-    // Ticketing: multiple ticket types with inventory
     ticketTypes: [
       {
         label: { type: String, required: true, trim: true },
@@ -34,7 +31,6 @@ const eventSchema = new mongoose.Schema(
       },
     ],
 
-    // Derived minimum price for recommendations and filters
     minPrice: { type: Number, default: 0, min: 0 },
 
     image: {
@@ -52,7 +48,6 @@ const eventSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Sync capacity to total ticket quantity when ticket types are provided
 eventSchema.pre("save", function syncCapacity(next) {
   if (Array.isArray(this.ticketTypes) && this.ticketTypes.length > 0) {
     const totalQty = this.ticketTypes.reduce((sum, t) => sum + (Number(t.quantity) || 0), 0);
@@ -63,7 +58,6 @@ eventSchema.pre("save", function syncCapacity(next) {
   next();
 });
 
-// Compute minPrice from ticketTypes or fallback to flat price
 eventSchema.pre("save", function computeMinPrice(next) {
   if (Array.isArray(this.ticketTypes) && this.ticketTypes.length > 0) {
     const min = this.ticketTypes

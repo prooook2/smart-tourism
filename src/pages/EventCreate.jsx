@@ -19,7 +19,6 @@ export default function EventCreate() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
-  // 📸 Handle image selection
   const handleImage = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -63,7 +62,6 @@ export default function EventCreate() {
 
       <form onSubmit={submit} className="space-y-3">
         
-        {/* IMAGE UPLOAD */}
         <div>
           <label className="block font-semibold mb-1">Image de l’événement</label>
           <input 

@@ -16,7 +16,6 @@ const userSchema = new mongoose.Schema(
     password: {
     type: String,
     required: function () {
-        // Password is required only for normal (non-Google) users
         return !this.googleId;
         },
     },

@@ -85,7 +85,6 @@ const Profile = () => {
       const key = normalize(cand);
       if (normalizedMap.has(key)) return normalizedMap.get(key);
     }
-    // Heuristic match by inclusion
     for (const cand of candidates) {
       const key = normalize(cand);
       for (const c of cities) {

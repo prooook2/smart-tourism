@@ -76,11 +76,9 @@ export const planItinerary = async (req, res) => {
     ]);
     console.log(`[Itinerary] Found ${candidates.length} candidates matching filters`);
 
-    // Only keep events with coordinates
     const withCoords = candidates.filter(e => e?.location?.coords?.lat != null && e?.location?.coords?.lng != null);
     console.log(`[Itinerary] ${withCoords.length} events have coordinates`);
 
-    // Pre-compute distances from start for diagnostics and fallback
     const withDistances = withCoords.map(e => {
       const dkm = haversineKm(startCoords, e.location.coords);
       const tmin = Math.ceil(dkm / speed);
@@ -125,7 +123,6 @@ export const planItinerary = async (req, res) => {
 
     fillWith(withCoords);
 
-    // Fallback 1: relax city (only if not strict)
     if (!strictFilters && picked.length < maxStops && cityFilter) {
       const relaxedFilters = { ...filters };
       delete relaxedFilters["location.city"];
@@ -139,7 +136,6 @@ export const planItinerary = async (req, res) => {
       fillWith(extraWithCoords);
     }
 
-    // Fallback 2: relax categories (only if not strict)
     if (!strictFilters && picked.length < maxStops && chosenCategories.length) {
       const relaxedFilters = { ...filters };
       delete relaxedFilters["location.city"];
@@ -154,11 +150,8 @@ export const planItinerary = async (req, res) => {
       fillWith(extraWithCoords);
     }
 
-    // Fallback 3 removed (budget)
-
     let suggestions = [];
     if (picked.length === 0 && withDistances.length > 0) {
-      // Provide up to 3 nearest suggestions with travel and block estimates
       suggestions = withDistances.slice(0, 3).map(x => ({
         eventId: x.e._id,
         title: x.e.title,

@@ -4,7 +4,6 @@ import { planItinerary } from "../controllers/itineraryController.js";
 
 const router = Router();
 
-// POST /api/itinerary/plan
 router.post("/plan", verifyToken, planItinerary);
 
 export default router;

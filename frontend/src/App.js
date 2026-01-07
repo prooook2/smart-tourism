@@ -32,7 +32,6 @@ function App() {
       <Navbar />
 
       <Routes>
-        {/* Public routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -58,7 +57,6 @@ function App() {
           }
         />
 
-        {/* Protected routes */}
         <Route
           path="/profile"
           element={

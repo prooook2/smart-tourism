@@ -20,7 +20,6 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 text-center">
-      {/* HERO SECTION */}
       <section className="bg-indigo-700 text-white py-20 px-6">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">
           Bienvenue sur la Plateforme Culturelle et Touristique 🌍
@@ -54,7 +53,6 @@ const HomePage = () => {
         )}
       </section>
 
-      {/* ABOUT SECTION */}
       <section className="py-12 px-6 max-w-4xl mx-auto">
         <h2 className="text-2xl font-bold text-indigo-700 mb-3">Notre Mission</h2>
         <p className="text-gray-700 leading-relaxed">
@@ -64,7 +62,6 @@ const HomePage = () => {
         </p>
       </section>
 
-      {/* FEATURED EVENTS SECTION */}
       <section className="bg-white py-12 px-6">
         <h2 className="text-2xl font-bold text-indigo-700 mb-6">Événements à venir</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
@@ -90,7 +87,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* FINAL CTA */}
       <section className="text-center py-12 bg-indigo-600 text-white">
         <h2 className="text-2xl font-bold mb-4">Vous organisez un événement ?</h2>
         <p className="mb-6">Partagez-le avec des milliers de visiteurs passionnés !</p>

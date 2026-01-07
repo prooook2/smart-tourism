@@ -24,7 +24,6 @@ const Register = () => {
     }
   };
 
-  // 🔹 Google signup
   const handleGoogleSignup = () => {
     window.location.href = "http://localhost:5000/api/auth/google";
   };
@@ -79,14 +78,12 @@ const Register = () => {
           </button>
         </form>
 
-        {/* Divider */}
         <div className="flex items-center my-4">
           <hr className="flex-grow border-gray-300" />
           <span className="mx-2 text-gray-500">ou</span>
           <hr className="flex-grow border-gray-300" />
         </div>
 
-        {/* Google Signup */}
         <button
           onClick={handleGoogleSignup}
           className="flex items-center justify-center w-full border border-gray-300 py-2 rounded-lg hover:bg-gray-100 transition"

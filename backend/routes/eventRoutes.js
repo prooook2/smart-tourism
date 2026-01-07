@@ -1,4 +1,3 @@
-// backend/routes/eventRoutes.js
 import express from "express";
 import uploadEventImage from "../middleware/eventUpload.js";
 import { cacheMiddleware, invalidateCache } from "../middleware/cacheMiddleware.js";
@@ -19,10 +18,9 @@ import { verifyToken, authorizeRoles } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", cacheMiddleware(30000), listEvents); // Cache for 30 seconds
-router.get("/:id", cacheMiddleware(60000), getEventById); // Cache for 60 seconds
+router.get("/", cacheMiddleware(30000), listEvents);
+router.get("/:id", cacheMiddleware(60000), getEventById);
 
-// Protected routes
 router.post(
   "/",
   verifyToken,

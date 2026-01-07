@@ -1,4 +1,3 @@
-// Standardized event categories used across the app
 export const categories = [
   "Culture",
   "Gastronomie",

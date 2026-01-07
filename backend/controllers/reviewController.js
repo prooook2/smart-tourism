@@ -32,7 +32,6 @@ export const createReview = async (req, res) => {
     const review = await Review.create({ event: eventId, user: userId, rating, comment });
     const populated = await review.populate("user", "name email");
 
-    // update event avg rating lightly (not persisted for now)
     res.status(201).json({ review: populated });
   } catch (err) {
     res.status(500).json({ message: "Impossible de créer l'avis" });

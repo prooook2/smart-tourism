@@ -1,5 +1,3 @@
-// Helper to prevent duplicate API calls
-
 class RequestDeduplicator {
   constructor() {
     this.pending = new Map();

@@ -1,4 +1,3 @@
-// backend/controllers/paymentController.js
 import Stripe from "stripe";
 import Event from "../models/Event.js";
 import Ticket from "../models/Ticket.js";
@@ -78,7 +77,6 @@ export const createCheckoutSession = async (req, res) => {
   }
 };
 
-// Fallback endpoint to finalize purchase if webhook does not reach local dev
 export const confirmCheckoutSession = async (req, res) => {
   const { session_id: sessionId } = req.body;
   if (!sessionId) return res.status(400).json({ message: "session_id requis" });
@@ -95,7 +93,6 @@ export const confirmCheckoutSession = async (req, res) => {
     const ticketTypeId = session.metadata?.ticketTypeId;
     if (!eventId || !userId) return res.status(400).json({ message: "Métadonnées manquantes" });
 
-    // Idempotency: skip if ticket already issued for this session
     const existing = await Ticket.findOne({ paymentId: session.id });
     if (existing) return res.json({ message: "Billet déjà généré" });
 
@@ -201,20 +198,17 @@ export const stripeWebhook = async (req, res) => {
         selectedTicket.sold = (selectedTicket.sold || 0) + 1;
       }
 
-      // Add the user to attendees
       if (!ev.attendees.includes(userId)) {
         ev.attendees.push(userId);
       }
 
       await ev.save();
 
-      // Generate QR Code (contains ticket ID)
       const ticketId = `${ev.title.replace(/\s+/g, "_")}-${selectedTicket?._id || "general"}-${userId}`;
 
       const qrData = await QRCode.toDataURL(ticketId);
       const pricePaid = selectedTicket?.price ?? ev.price;
 
-      // Save ticket in DB
       const ticket = await Ticket.create({
         user: userId,
         event: eventId,

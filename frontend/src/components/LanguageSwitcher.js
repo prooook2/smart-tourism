@@ -9,7 +9,6 @@ export default function LanguageSwitcher() {
     i18n.changeLanguage(lng);
     localStorage.setItem('language', lng);
     setOpen(false);
-    // Change HTML dir for Arabic
     document.documentElement.dir = lng === 'ar' ? 'rtl' : 'ltr';
   };
 
