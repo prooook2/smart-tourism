@@ -6,6 +6,18 @@ import LogoutButton from "../components/LogoutButton";
 const inputClass =
   "w-full rounded-2xl border border-pink-100 bg-secondary/80 px-4 py-3 text-sm text-ink outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30";
 
+const cities = [
+  "Tunis", "Sfax", "sousse", "Kairouan", "Bizerte", "Gabès", "Ariana", 
+  "Gafsa", "Monastir", "Ben Arous", "Kasserine", "Médenine", "Nabeul",
+  "Tataouine", "Béja", "Jendouba", "Mahdia", "Sidi Bouzid", "Zaghouan",
+  "Siliana", "Kébili", "Tozeur", "Manouba", "La Marsa", "Hammamet", "Djerba"
+];
+
+const categories = [
+  "Culture", "Gastronomie", "Art", "Patrimoine", "Sport", "Music", 
+  "Nature", "Festival", "Conférence", "Atelier", "Spectacle", "Exposition"
+];
+
 const Profile = () => {
   const [user, setUser] = useState({});
   const [events, setEvents] = useState({
@@ -13,7 +25,8 @@ const Profile = () => {
     registered: [],
   });
   const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
+  const [formData, setFormData] = useState({ name: "", email: "", password: "", city: "", interests: [], budgetMin: 0, budgetMax: 0 });
+  const [locating, setLocating] = useState(false);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -23,7 +36,7 @@ const Profile = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser(res.data);
-        setFormData({ name: res.data.name, email: res.data.email, password: "" });
+          setFormData({ name: res.data.name, email: res.data.email, password: "", city: res.data.city || "", interests: res.data.interests || [], budgetMin: res.data.budgetMin ?? 0, budgetMax: res.data.budgetMax ?? 0, coords: res.data.coords || undefined });
       } catch (error) {
         console.error(error);
       }
@@ -50,6 +63,74 @@ const Profile = () => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const normalize = (s = "") => s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+  const resolveCityFromAddress = (address) => {
+    const candidates = [
+      address?.city,
+      address?.town,
+      address?.village,
+      address?.municipality,
+      address?.county,
+      address?.state_district,
+    ].filter(Boolean);
+    const normalizedMap = new Map(cities.map((c) => [normalize(c), c]));
+    for (const cand of candidates) {
+      const key = normalize(cand);
+      if (normalizedMap.has(key)) return normalizedMap.get(key);
+    }
+    // Heuristic match by inclusion
+    for (const cand of candidates) {
+      const key = normalize(cand);
+      for (const c of cities) {
+        if (key.includes(normalize(c))) return c;
+      }
+    }
+    return null;
+  };
+
+  const useMyLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("La géolocalisation n'est pas supportée par votre navigateur.");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`;
+          const resp = await fetch(url, { headers: { Accept: "application/json" } });
+          const data = await resp.json();
+          const detected = resolveCityFromAddress(data?.address || {});
+          if (detected) {
+            setFormData((prev) => ({ ...prev, city: detected, coords: { lat: latitude, lng: longitude } }));
+            toast.success(`Ville détectée: ${detected}`);
+          } else {
+            toast("Ville non reconnue, sélectionnez-la dans la liste.");
+          }
+        } catch (e) {
+          toast.error("Échec de la détection de la ville.");
+        } finally {
+          setLocating(false);
+        }
+      },
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+          toast.error("Permission de localisation refusée.");
+        } else {
+          toast.error("Impossible d'obtenir votre position.");
+        }
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+    );
   };
 
   const handleSave = async (e) => {
@@ -125,6 +206,22 @@ const Profile = () => {
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Profil</p>
             <h1 className="mt-2 text-3xl font-bold text-ink">{user.name}</h1>
             <p className="text-dusk/70">{user.email}</p>
+            {user.city && <p className="text-sm text-dusk/60">📍 {user.city}</p>}
+            {(user.budgetMin !== undefined || user.budgetMax !== undefined) && (
+              <p className="text-sm text-dusk/60">
+                💸 Budget: {typeof user.budgetMin === 'number' ? user.budgetMin : 0}
+                {typeof user.budgetMax === 'number' && user.budgetMax > 0 ? ` - ${user.budgetMax}` : ' +'} €
+              </p>
+            )}
+              {user.interests?.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {user.interests.map(int => (
+                    <span key={int} className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                      {int}
+                    </span>
+                  ))}
+                </div>
+              )}
             <p className="mt-2 inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-primary">
               {user.role}
             </p>
@@ -134,6 +231,70 @@ const Profile = () => {
                 <form onSubmit={handleSave} className="space-y-4">
                   <input className={inputClass} name="name" value={formData.name} onChange={handleChange} placeholder="Nom complet" />
                   <input className={inputClass} name="email" value={formData.email} onChange={handleChange} placeholder="Email" />
+                  <div className="flex items-center gap-3">
+                    <select className={`${inputClass} flex-1`} name="city" value={formData.city} onChange={handleChange}>
+                      <option value="">Sélectionnez votre ville</option>
+                      {cities.map(city => (
+                        <option key={city} value={city}>{city}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={useMyLocation}
+                      disabled={locating}
+                      className="whitespace-nowrap rounded-full border border-primary/30 px-4 py-3 text-sm font-semibold text-primary transition hover:border-primary hover:bg-primary/5 disabled:opacity-60"
+                    >
+                      {locating ? "Localisation…" : "📍 Ma position"}
+                    </button>
+                  </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-dusk">Centres d'intérêt</label>
+                      <div className="rounded-2xl border border-pink-100 bg-white p-4">
+                        <div className="flex flex-wrap gap-2">
+                          {categories.map(cat => (
+                            <button
+                              key={cat}
+                              type="button"
+                              onClick={() => {
+                                const isSelected = formData.interests.includes(cat);
+                                setFormData({
+                                  ...formData,
+                                  interests: isSelected
+                                    ? formData.interests.filter(i => i !== cat)
+                                    : [...formData.interests, cat]
+                                });
+                              }}
+                              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                                formData.interests.includes(cat)
+                                  ? "bg-primary text-white shadow-glow"
+                                  : "border border-dusk/10 text-dusk hover:border-primary hover:text-primary"
+                              }`}
+                            >
+                              {cat}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-dusk">Budget préféré</label>
+                      <select
+                        className={inputClass}
+                        value={(formData.budgetMin || 0) + '-' + (formData.budgetMax || '')}
+                        onChange={(e) => {
+                          const [minStr, maxStr] = e.target.value.split('-');
+                          const min = Number(minStr) || 0;
+                          const max = maxStr === '' ? undefined : Number(maxStr);
+                          setFormData({ ...formData, budgetMin: min, budgetMax: max });
+                        }}
+                      >
+                        <option value={'0-0'}>Gratuit</option>
+                        <option value={'0-20'}>0 - 20 €</option>
+                        <option value={'20-50'}>20 - 50 €</option>
+                        <option value={'50-100'}>50 - 100 €</option>
+                        <option value={'100-'}>100 € et +</option>
+                      </select>
+                    </div>
                   <input
                     className={inputClass}
                     name="password"

@@ -20,6 +20,7 @@ import EventEdit from "./pages/EventEdit";
 import SuccessPage from "./pages/SuccessPage";
 import CancelPage from "./pages/CancelPage";
 import RecommendedEvents from "./pages/RecommendedEvents";
+import ItineraryPlan from "./pages/ItineraryPlan";
 import MyEvents from "./pages/MyEvents";
 import SavedEvents from "./pages/SavedEvents";
 import NotificationCenter from "./pages/NotificationCenter";
@@ -45,6 +46,14 @@ function App() {
           element={
             <ProtectedRoute>
               <RecommendedEvents />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/itinerary"
+          element={
+            <ProtectedRoute>
+              <ItineraryPlan />
             </ProtectedRoute>
           }
         />

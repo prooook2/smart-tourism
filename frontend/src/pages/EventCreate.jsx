@@ -25,6 +25,18 @@ function LocationPicker({ onChange }) {
 const inputClass =
   "w-full rounded-2xl border border-pink-100 bg-white px-4 py-3 text-sm text-ink outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30";
 
+const cities = [
+  "Tunis", "Sfax", "Sousse", "Kairouan", "Bizerte", "Gabès", "Ariana",
+  "Gafsa", "Monastir", "Ben Arous", "Kasserine", "Médenine", "Nabeul",
+  "Tataouine", "Béja", "Jendouba", "Mahdia", "Sidi Bouzid", "Zaghouan",
+  "Siliana", "Kébili", "Tozeur", "Manouba", "La Marsa", "Hammamet", "Djerba"
+];
+
+const categories = [
+  "Culture", "Gastronomie", "Art", "Patrimoine", "Sport", "Music",
+  "Nature", "Festival", "Conférence", "Atelier", "Spectacle", "Exposition"
+];
+
 export default function EventCreate() {
   const [form, setForm] = useState({
     title: "",
@@ -65,10 +77,11 @@ export default function EventCreate() {
 
     try {
       const fd = new FormData();
-      fd.append("title", form.title);
-      fd.append("description", form.description);
-      fd.append("date", form.date);
-      fd.append("category", form.category);
+    fd.append("title", form.title);
+    fd.append("description", form.description);
+    fd.append("date", form.date);
+    fd.append("duration", form.duration || 90);
+    fd.append("category", form.category);
       fd.append("capacity", form.capacity);
       fd.append(
         "location",
@@ -128,12 +141,17 @@ export default function EventCreate() {
               </div>
               <div className="space-y-3">
                 <label className="text-sm font-semibold text-dusk">Catégorie</label>
-                <input
+                <select
                   name="category"
+                  value={form.category}
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  placeholder="Gastronomie, Art, Patrimoine..."
                   className={inputClass}
-                />
+                >
+                  <option value="">Sélectionnez une catégorie</option>
+                  {categories.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
               </div>
             </div>
             <div className="mt-6 space-y-3">
@@ -300,12 +318,17 @@ export default function EventCreate() {
             <div className="mt-4 grid gap-6 md:grid-cols-2">
               <div className="space-y-3">
                 <label className="text-sm font-semibold text-dusk">Ville</label>
-                <input
+                <select
                   name="location.city"
-                  placeholder="Tunis, Sidi Bou, Hammamet..."
+                  value={form.location.city}
                   onChange={(e) => setForm({ ...form, location: { ...form.location, city: e.target.value } })}
                   className={inputClass}
-                />
+                >
+                  <option value="">Sélectionnez une ville</option>
+                  {cities.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-3">
                 <label className="text-sm font-semibold text-dusk">Adresse</label>

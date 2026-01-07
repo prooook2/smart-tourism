@@ -19,13 +19,20 @@ export const getUserProfile = async (req, res) => {
 // 🟡 UPDATE USER PROFILE
 export const updateUserProfile = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, city, interests, budgetMin, budgetMax, coords } = req.body;
     const user = await User.findById(req.user.id);
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
     if (name) user.name = name;
     if (email) user.email = email;
+    if (city !== undefined) user.city = city;
+    if (interests !== undefined) user.interests = interests;
+    if (budgetMin !== undefined) user.budgetMin = budgetMin;
+    if (budgetMax !== undefined) user.budgetMax = budgetMax;
+    if (coords && typeof coords.lat === 'number' && typeof coords.lng === 'number') {
+      user.coords = { lat: coords.lat, lng: coords.lng };
+    }
 
     if (password) {
       const salt = await bcrypt.genSalt(10);
@@ -41,8 +48,12 @@ export const updateUserProfile = async (req, res) => {
         name: updatedUser.name,
         email: updatedUser.email,
         role: updatedUser.role,
-        avatar: updatedUser.avatar,  // ADD THIS
-
+        avatar: updatedUser.avatar,
+        city: updatedUser.city,
+        interests: updatedUser.interests,
+        coords: updatedUser.coords,
+        budgetMin: updatedUser.budgetMin,
+        budgetMax: updatedUser.budgetMax,
       },
     });
   } catch (error) {

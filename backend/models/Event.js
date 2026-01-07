@@ -6,6 +6,8 @@ const eventSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true },
     description: { type: String, required: true },
     date: { type: Date, required: true },
+    time: { type: String, trim: true }, // HH:MM format, optional
+    duration: { type: Number, default: 90, min: 0 }, // Duration in minutes
     location: {
       city: String,
       coords: {
@@ -32,6 +34,9 @@ const eventSchema = new mongoose.Schema(
       },
     ],
 
+    // Derived minimum price for recommendations and filters
+    minPrice: { type: Number, default: 0, min: 0 },
+
     image: {
       type: String,
       default: "",
@@ -54,6 +59,20 @@ eventSchema.pre("save", function syncCapacity(next) {
     if (!Number.isNaN(totalQty) && totalQty >= 0) {
       this.capacity = totalQty;
     }
+  }
+  next();
+});
+
+// Compute minPrice from ticketTypes or fallback to flat price
+eventSchema.pre("save", function computeMinPrice(next) {
+  if (Array.isArray(this.ticketTypes) && this.ticketTypes.length > 0) {
+    const min = this.ticketTypes
+      .map((t) => Number(t.price))
+      .filter((p) => !Number.isNaN(p) && p >= 0)
+      .reduce((acc, p) => (acc === null ? p : Math.min(acc, p)), null);
+    if (min !== null) this.minPrice = min;
+  } else if (typeof this.price === "number" && this.price >= 0) {
+    this.minPrice = this.price;
   }
   next();
 });

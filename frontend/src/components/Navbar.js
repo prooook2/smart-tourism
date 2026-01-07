@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -8,6 +8,19 @@ const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [priceRange, setPriceRange] = useState("");
   const [showSearchPanel, setShowSearchPanel] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const profileMenuRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setShowProfileMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const logout = () => {
     localStorage.clear();
@@ -64,19 +77,6 @@ const Navbar = () => {
           >
             🔍 Chercher
           </button>
-          {token && (
-            <>
-              <Link to="/my-events" className="hover:text-primary transition-colors">
-                Mes événements
-              </Link>
-              <Link to="/saved-events" className="hover:text-primary transition-colors">
-                ❤️ Favoris
-              </Link>
-              <Link to="/notifications" className="hover:text-primary transition-colors">
-                🔔 Notifications
-              </Link>
-            </>
-          )}
          {!token && (
           <>
             <Link to="/register" className="hover:text-primary transition-colors">
@@ -93,32 +93,121 @@ const Navbar = () => {
           {user && (user.role === "organisateur" || user.role === "admin") && (
             <Link
               to="/events/create"
-              className="hidden rounded-full border border-primary/30 px-4 py-2 text-sm font-semibold text-primary hover:border-primary hover:bg-primary/10 md:inline-flex"
+              className="hidden rounded-full border border-primary/30 px-4 py-2 text-sm font-semibold text-primary hover:border-primary hover:bg-primary/10 lg:inline-flex"
             >
               Ajouter un événement
             </Link>
           )}
 
           {user ? (
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-xs uppercase tracking-wider text-dusk/70">Connecté</p>
-                <p className="text-sm font-semibold text-ink">
-                  {user.name} · {user.role}
-                </p>
-              </div>
-              <Link
-                to={roleDashboard[user.role] || "/profile"}
-                className="hidden rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5 md:inline-flex"
-              >
-                Tableau de bord
-              </Link>
+            <div className="relative flex items-center gap-3" ref={profileMenuRef}>
               <button
-                onClick={logout}
-                className="rounded-full border border-dusk/10 px-3 py-2 text-sm font-semibold text-dusk transition hover:bg-dusk/5"
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="flex items-center gap-2 rounded-full border border-dusk/10 bg-white px-3 py-2 shadow-sm transition hover:border-primary hover:shadow-md"
               >
-                Déconnexion
+                <img
+                  src={user.avatar || "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+                  alt="Profile"
+                  className="h-8 w-8 rounded-full object-cover"
+                />
+                <div className="hidden text-left md:block">
+                  <p className="text-xs font-semibold text-ink">{user.name}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-dusk/60">{user.role}</p>
+                </div>
+                <svg className={`h-4 w-4 text-dusk transition-transform ${showProfileMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
               </button>
+
+              {/* Dropdown Menu */}
+              {showProfileMenu && (
+                <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-dusk/10 bg-white shadow-xl">
+                  <div className="p-3 border-b border-dusk/5">
+                    <p className="text-sm font-semibold text-ink">{user.name}</p>
+                    <p className="text-xs text-dusk/60">{user.email}</p>
+                  </div>
+                  <div className="py-2">
+                    <Link
+                      to="/profile"
+                      onClick={() => setShowProfileMenu(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-dusk hover:bg-primary/5 hover:text-primary transition-colors"
+                    >
+                      <span>👤</span>
+                      <span>Mon profil</span>
+                    </Link>
+                    <Link
+                      to={roleDashboard[user.role] || "/profile"}
+                      onClick={() => setShowProfileMenu(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-dusk hover:bg-primary/5 hover:text-primary transition-colors"
+                    >
+                      <span>📊</span>
+                      <span>Tableau de bord</span>
+                    </Link>
+                    <Link
+                      to="/my-events"
+                      onClick={() => setShowProfileMenu(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-dusk hover:bg-primary/5 hover:text-primary transition-colors"
+                    >
+                      <span>🎫</span>
+                      <span>Mes événements</span>
+                    </Link>
+                    <Link
+                      to="/saved-events"
+                      onClick={() => setShowProfileMenu(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-dusk hover:bg-primary/5 hover:text-primary transition-colors"
+                    >
+                      <span>❤️</span>
+                      <span>Favoris</span>
+                    </Link>
+                    <Link
+                      to="/recommend"
+                      onClick={() => setShowProfileMenu(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-dusk hover:bg-primary/5 hover:text-primary transition-colors"
+                    >
+                      <span>🎯</span>
+                      <span>Recommandations</span>
+                    </Link>
+                    <Link
+                      to="/itinerary"
+                      onClick={() => setShowProfileMenu(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-dusk hover:bg-primary/5 hover:text-primary transition-colors"
+                    >
+                      <span>🗺️</span>
+                      <span>Itinéraire</span>
+                    </Link>
+                    <Link
+                      to="/notifications"
+                      onClick={() => setShowProfileMenu(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-dusk hover:bg-primary/5 hover:text-primary transition-colors"
+                    >
+                      <span>🔔</span>
+                      <span>Notifications</span>
+                    </Link>
+                    {(user.role === "organisateur" || user.role === "admin") && (
+                      <Link
+                        to="/events/create"
+                        onClick={() => setShowProfileMenu(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-dusk hover:bg-primary/5 hover:text-primary transition-colors"
+                      >
+                        <span>➕</span>
+                        <span>Créer un événement</span>
+                      </Link>
+                    )}
+                  </div>
+                  <div className="border-t border-dusk/5 py-2">
+                    <button
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        logout();
+                      }}
+                      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                    >
+                      <span>🚪</span>
+                      <span>Déconnexion</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <Link

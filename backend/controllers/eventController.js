@@ -63,6 +63,8 @@ export const createEvent = async (req, res) => {
     // Set organiser to logged user
     data.organizer = req.user.id;
     data.price = Number(data.price || 0);
+    if (data.time) data.time = data.time.trim();
+    if (data.duration) data.duration = Number(data.duration) || 90;
 
     // Save image if uploaded
     if (req.file) {
@@ -214,6 +216,8 @@ export const updateEvent = async (req, res) => {
     if (data.price !== undefined) {
       data.price = Number(data.price) || 0;
     }
+    if (data.time) data.time = data.time.trim();
+    if (data.duration) data.duration = Number(data.duration) || 90;
 
     // If image uploaded
     if (req.file) {

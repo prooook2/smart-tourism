@@ -26,7 +26,16 @@ const userSchema = new mongoose.Schema(
       type: [String],
       default: []
     },
-
+    city: {
+      type: String,
+      trim: true,
+    },
+    coords: {
+      lat: { type: Number },
+      lng: { type: Number },
+    },
+    budgetMin: { type: Number, min: 0 },
+    budgetMax: { type: Number, min: 0 },
 
     role: {
       type: String,

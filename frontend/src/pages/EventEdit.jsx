@@ -2,9 +2,12 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import { categories } from "../utils/categories";
 
 const inputClass =
   "w-full rounded-2xl border border-pink-100 bg-white px-4 py-3 text-sm text-ink outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30";
+
+// Categories are now centralized in ../utils/categories
 
 export default function EventEdit() {
   const { id } = useParams();
@@ -51,6 +54,7 @@ export default function EventEdit() {
     fd.append("title", form.title);
     fd.append("description", form.description);
     fd.append("date", form.date);
+    fd.append("duration", form.duration || 90);
     fd.append("category", form.category);
     fd.append("capacity", form.capacity);
     fd.append("location", JSON.stringify(form.location));
@@ -103,11 +107,16 @@ export default function EventEdit() {
             </div>
             <div className="space-y-3">
               <label className="text-sm font-semibold text-dusk">Catégorie</label>
-              <input
+              <select
                 className={inputClass}
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
-              />
+              >
+                <option value="">Sélectionnez une catégorie</option>
+                {categories.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -129,6 +138,16 @@ export default function EventEdit() {
                 className={inputClass}
                 value={form.date?.slice(0, 16)}
                 onChange={(e) => setForm({ ...form, date: e.target.value })}
+              />
+            </div>
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-dusk">Durée (minutes)</label>
+              <input
+                type="number"
+                className={inputClass}
+                value={form.duration || 90}
+                onChange={(e) => setForm({ ...form, duration: Number(e.target.value) })}
+                min="15"
               />
             </div>
             <div className="space-y-3">
