@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { useTranslation } from "react-i18next";
 import SaveEventButton from "../components/SaveEventButton";
 import EventReviewSection from "../components/EventReviewSection";
 import { sendEventNotification } from "../utils/notifications";
@@ -25,6 +26,7 @@ const markerIcon = new L.Icon({
 
 export default function EventDetails() {
   const { id } = useParams();
+  const { t } = useTranslation();
 
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -55,7 +57,7 @@ export default function EventDetails() {
           setRegistered(true);
         }
       } catch (err) {
-        toast.error("Erreur lors du chargement de l'événement");
+        toast.error(t("common.error"));
       } finally {
         setLoading(false);
       }
@@ -66,7 +68,7 @@ export default function EventDetails() {
   // Register for FREE event
   const handleRegister = async () => {
     if (event.ticketTypes?.length && !selectedTicketId) {
-      toast.error("Choisissez un type de billet");
+      toast.error(t("events.chooseTicket"));
       return;
     }
     try {
@@ -75,11 +77,11 @@ export default function EventDetails() {
         event.ticketTypes?.length ? { ticketTypeId: selectedTicketId } : {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success("Inscription réussie !");
+      toast.success(t("events.registrationSuccess"));
       setRegistered(true);
       setEvent({ ...event, attendees: [...event.attendees, user] });
     } catch (err) {
-      toast.error(err.response?.data?.message || "Erreur d'inscription");
+      toast.error(err.response?.data?.message || t("common.error"));
     }
   };
 
@@ -91,21 +93,21 @@ export default function EventDetails() {
         event.ticketTypes?.length ? { ticketTypeId: selectedTicketId } : {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success("Désinscription réussie !");
+      toast.success(t("events.cancellationSuccess"));
       setRegistered(false);
       setEvent({
         ...event,
         attendees: event.attendees.filter(a => a._id !== user._id),
       });
     } catch (err) {
-      toast.error(err.response?.data?.message || "Erreur de désinscription");
+      toast.error(err.response?.data?.message || t("common.error"));
     }
   };
 
   // Stripe payment
   const handlePayment = async () => {
     if (event.ticketTypes?.length && !selectedTicketId) {
-      toast.error("Choisissez un type de billet");
+      toast.error(t("events.chooseTicket"));
       return;
     }
     try {
@@ -117,7 +119,7 @@ export default function EventDetails() {
 
       window.location.href = res.data.url; // Redirect to Stripe
     } catch (err) {
-      toast.error("Erreur lors du paiement");
+      toast.error(t("events.paymentError"));
     }
   };
 
@@ -127,24 +129,24 @@ export default function EventDetails() {
   const handleSendNotification = async (e) => {
     e.preventDefault();
     if (!notifyData.message.trim()) {
-      toast.error("Ajoutez un message à envoyer");
+      toast.error(t("events.addMessage"));
       return;
     }
     try {
       setSending(true);
       await sendEventNotification(id, notifyData, token);
-      toast.success("Notification envoyée");
+      toast.success(t("events.notificationSent"));
       setNotifyData({ ...notifyData, message: "", title: notifyData.title });
     } catch (err) {
-      const msg = err.response?.data?.message || "Envoi impossible";
+      const msg = err.response?.data?.message || t("events.sendError");
       toast.error(msg);
     } finally {
       setSending(false);
     }
   };
 
-  if (loading) return <div className="text-center mt-10 text-dusk/60">Chargement...</div>;
-  if (!event) return <div className="text-center mt-10 text-dusk/60">Événement introuvable.</div>;
+  if (loading) return <div className="text-center mt-10 text-dusk/60">{t("common.loading")}</div>;
+  if (!event) return <div className="text-center mt-10 text-dusk/60">{t("events.notFound")}</div>;
 
   const hasTicketTypes = event.ticketTypes?.length > 0;
   const selectedTicket = hasTicketTypes
@@ -180,21 +182,21 @@ export default function EventDetails() {
               <span className="rounded-full bg-primary/10 px-4 py-2 font-semibold text-primary">
                 {hasTicketTypes
                   ? minTicketPrice && minTicketPrice > 0
-                    ? `À partir de ${minTicketPrice} € · Billetterie`
-                    : "Billets gratuits disponibles"
+                    ? `${t("events.from")} ${minTicketPrice} € · ${t("events.billing")}`
+                    : t("events.availableTickets")
                   : isPaidEvent
-                    ? `${event.price} € · Billetterie`
-                    : "Événement gratuit"}
+                    ? `${event.price} € · ${t("events.billing")}`
+                    : t("events.free")}
               </span>
-              <span>Organisé par {event.organizer?.name || "—"}</span>
+              <span>{t("events.organizer")} {event.organizer?.name || "—"}</span>
               <span>
-                Capacité {event.attendees?.length || 0} / {event.capacity || "—"}
+                {t("events.capacity")} {event.attendees?.length || 0} / {event.capacity || "—"}
               </span>
             </div>
 
           {hasTicketTypes && (
             <div className="mt-6 space-y-3">
-              <p className="text-sm font-semibold text-dusk">Choisissez votre billet</p>
+              <p className="text-sm font-semibold text-dusk">{t("events.chooseTicket")}</p>
               <div className="grid gap-3 md:grid-cols-2">
                 {event.ticketTypes.map((t) => {
                   const remaining = (t.quantity || 0) - (t.sold || 0);
@@ -217,7 +219,7 @@ export default function EventDetails() {
                       </div>
                       {t.description && <p className="mt-1 text-xs text-dusk/70">{t.description}</p>}
                       <div className="mt-2 text-xs font-semibold text-dusk/80">
-                        {soldOut ? "Complet" : `${remaining} restants`}
+                        {soldOut ? t("events.soldOut") : `${remaining} ${t("events.remaining")}`}
                       </div>
                     </button>
                   );
@@ -235,7 +237,7 @@ export default function EventDetails() {
           onClick={handleCancel}
           className="rounded-full border border-red-200 px-6 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
         >
-          Annuler ma participation
+          {t("events.cancel")}
         </button>
       ) : isFull ? (
         // Paid event but full → disable button
@@ -243,7 +245,7 @@ export default function EventDetails() {
           disabled
           className="rounded-full bg-gray-400 px-6 py-3 text-sm font-semibold text-white cursor-not-allowed"
         >
-          Événement complet
+          {t("events.full")}
         </button>
       ) : (
         // Paid event & not registered & not full → buy ticket
@@ -251,7 +253,7 @@ export default function EventDetails() {
           onClick={handlePayment}
           className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5"
         >
-          Acheter un billet
+          {t("events.purchase")}
         </button>
       )
       ) : registered ? (
@@ -260,7 +262,7 @@ export default function EventDetails() {
           onClick={handleCancel}
           className="rounded-full border border-red-200 px-6 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
         >
-          Annuler ma participation
+          {t("events.cancel")}
         </button>
       ) : isFull ? (
         // Free event but full → block
@@ -268,7 +270,7 @@ export default function EventDetails() {
           disabled
           className="rounded-full bg-gray-400 px-6 py-3 text-sm font-semibold text-white cursor-not-allowed"
         >
-          Événement complet
+          {t("events.full")}
         </button>
       ) : (
         // Free event & not full → allow register
@@ -276,12 +278,12 @@ export default function EventDetails() {
           onClick={handleRegister}
           className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5"
         >
-          Réserver ma place
+          {t("events.register")}
         </button>
       )
     ) : (
       <p className="text-sm font-semibold text-primary">
-        Connectez-vous pour réserver cette expérience.
+        {t("events.connect")}
       </p>
     )}
   </div>
@@ -293,26 +295,26 @@ export default function EventDetails() {
           <div className="mx-auto max-w-5xl rounded-3xl border border-primary/15 bg-white/95 p-6 shadow-lg shadow-primary/15">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Notifier les inscrits</p>
-                <h2 className="text-2xl font-semibold text-ink">Envoyer un rappel ou une annonce</h2>
-                <p className="text-sm text-dusk/70">Participants inscrits et, en option, ceux qui ont sauvegardé l'événement.</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">{t("events.notification")}</p>
+                <h2 className="text-2xl font-semibold text-ink">{t("events.notifyRegistered")}</h2>
+                <p className="text-sm text-dusk/70">{t("events.participantsAndSaved")}</p>
               </div>
             </div>
 
             <form onSubmit={handleSendNotification} className="mt-4 grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
-                <label className="block text-sm font-semibold text-dusk/80">Type de notification</label>
+                <label className="block text-sm font-semibold text-dusk/80">{t("events.notificationType")}</label>
                 <select
                   value={notifyData.type}
                   onChange={(e) => setNotifyData({ ...notifyData, type: e.target.value })}
                   className="w-full rounded-2xl border border-dusk/10 bg-secondary px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
                 >
-                  <option value="reminder">Rappel</option>
-                  <option value="update">Mise à jour</option>
-                  <option value="cancellation">Annulation</option>
+                  <option value="reminder">{t("events.reminder")}</option>
+                  <option value="update">{t("events.update")}</option>
+                  <option value="cancellation">{t("events.cancellation")}</option>
                 </select>
 
-                <label className="block text-sm font-semibold text-dusk/80">Titre (optionnel)</label>
+                <label className="block text-sm font-semibold text-dusk/80">{t("events.titleLabel")}</label>
                 <input
                   type="text"
                   value={notifyData.title}
@@ -323,7 +325,7 @@ export default function EventDetails() {
               </div>
 
               <div className="space-y-3">
-                <label className="block text-sm font-semibold text-dusk/80">Message</label>
+                <label className="block text-sm font-semibold text-dusk/80">{t("events.message")}</label>
                 <textarea
                   value={notifyData.message}
                   onChange={(e) => setNotifyData({ ...notifyData, message: e.target.value })}
@@ -339,7 +341,7 @@ export default function EventDetails() {
                     onChange={(e) => setNotifyData({ ...notifyData, includeSaved: e.target.checked })}
                     className="h-4 w-4 rounded border-dusk/40 text-primary focus:ring-primary"
                   />
-                  Inclure aussi les personnes ayant mis en favori
+                  {t("events.includeSaved")}
                 </label>
 
                 <button
@@ -347,7 +349,7 @@ export default function EventDetails() {
                   disabled={sending}
                   className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {sending ? "Envoi..." : "Envoyer la notification"}
+                  {sending ? t("events.sending") : t("events.sendNotification")}
                 </button>
               </div>
             </form>
@@ -358,8 +360,8 @@ export default function EventDetails() {
 
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-3xl border border-pink-50 bg-white/95 p-6 shadow-lg shadow-primary/10">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Communauté</p>
-            <h3 className="mt-3 text-2xl font-semibold text-ink">Participants inscrits</h3>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">{t("events.community")}</p>
+            <h3 className="mt-3 text-2xl font-semibold text-ink">{t("events.participants")}</h3>
             {event.attendees?.length > 0 ? (
               <ul className="mt-4 space-y-2">
                 {event.attendees.map((a) => (
@@ -369,13 +371,13 @@ export default function EventDetails() {
                 ))}
               </ul>
             ) : (
-              <p className="mt-4 text-sm text-dusk/60">Aucun participant pour le moment.</p>
+              <p className="mt-4 text-sm text-dusk/60">{t("events.noParticipants")}</p>
             )}
           </div>
 
           {event.location?.coords && (
             <div className="rounded-3xl border border-pink-50 bg-white/95 p-2 shadow-lg shadow-primary/10">
-              <p className="px-4 pt-4 text-xs font-semibold uppercase tracking-[0.3em] text-primary">Localisation</p>
+              <p className="px-4 pt-4 text-xs font-semibold uppercase tracking-[0.3em] text-primary">{t("events.location")}</p>
               <div className="mt-4 overflow-hidden rounded-2xl">
                 <MapContainer center={event.location.coords} zoom={13} style={{ height: "320px", width: "100%" }}>
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />

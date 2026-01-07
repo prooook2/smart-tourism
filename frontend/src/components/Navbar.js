@@ -1,8 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const user = JSON.parse(localStorage.getItem("user"));
   const token = localStorage.getItem("token");
   const [searchTerm, setSearchTerm] = useState("");
@@ -66,24 +69,24 @@ const Navbar = () => {
 
         <div className="hidden items-center gap-6 text-sm font-medium text-dusk md:flex">
           <Link to="/" className="hover:text-primary transition-colors">
-            Accueil
+            {t("nav.home")}
           </Link>
           <Link to="/events" className="hover:text-primary transition-colors">
-            Événements
+            {t("nav.events")}
           </Link>
           <button
             onClick={() => setShowSearchPanel(!showSearchPanel)}
             className="hover:text-primary transition-colors flex items-center gap-1"
           >
-            🔍 Chercher
+            🔍 {t("nav.search")}
           </button>
          {!token && (
           <>
             <Link to="/register" className="hover:text-primary transition-colors">
-              Inscription
+              {t("nav.register")}
             </Link>
             <Link to="/login" className="hover:text-primary transition-colors">
-              Connexion
+              {t("nav.login")}
             </Link>
           </>
         )}
@@ -95,9 +98,11 @@ const Navbar = () => {
               to="/events/create"
               className="hidden rounded-full border border-primary/30 px-4 py-2 text-sm font-semibold text-primary hover:border-primary hover:bg-primary/10 lg:inline-flex"
             >
-              Ajouter un événement
+              {t("nav.createEvent")}
             </Link>
           )}
+
+          <LanguageSwitcher />
 
           {user ? (
             <div className="relative flex items-center gap-3" ref={profileMenuRef}>
@@ -133,7 +138,7 @@ const Navbar = () => {
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-dusk hover:bg-primary/5 hover:text-primary transition-colors"
                     >
                       <span>👤</span>
-                      <span>Mon profil</span>
+                      <span>{t("nav.myProfile")}</span>
                     </Link>
                     <Link
                       to={roleDashboard[user.role] || "/profile"}
@@ -141,7 +146,7 @@ const Navbar = () => {
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-dusk hover:bg-primary/5 hover:text-primary transition-colors"
                     >
                       <span>📊</span>
-                      <span>Tableau de bord</span>
+                      <span>{t("nav.dashboard")}</span>
                     </Link>
                     <Link
                       to="/my-events"
@@ -149,7 +154,7 @@ const Navbar = () => {
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-dusk hover:bg-primary/5 hover:text-primary transition-colors"
                     >
                       <span>🎫</span>
-                      <span>Mes événements</span>
+                      <span>{t("nav.myEvents")}</span>
                     </Link>
                     <Link
                       to="/saved-events"
@@ -157,7 +162,7 @@ const Navbar = () => {
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-dusk hover:bg-primary/5 hover:text-primary transition-colors"
                     >
                       <span>❤️</span>
-                      <span>Favoris</span>
+                      <span>{t("nav.favorites")}</span>
                     </Link>
                     <Link
                       to="/recommend"
@@ -165,7 +170,7 @@ const Navbar = () => {
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-dusk hover:bg-primary/5 hover:text-primary transition-colors"
                     >
                       <span>🎯</span>
-                      <span>Recommandations</span>
+                      <span>{t("nav.recommendations")}</span>
                     </Link>
                     <Link
                       to="/itinerary"
@@ -173,7 +178,7 @@ const Navbar = () => {
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-dusk hover:bg-primary/5 hover:text-primary transition-colors"
                     >
                       <span>🗺️</span>
-                      <span>Itinéraire</span>
+                      <span>{t("nav.itinerary")}</span>
                     </Link>
                     <Link
                       to="/notifications"
@@ -181,7 +186,7 @@ const Navbar = () => {
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-dusk hover:bg-primary/5 hover:text-primary transition-colors"
                     >
                       <span>🔔</span>
-                      <span>Notifications</span>
+                      <span>{t("nav.notifications")}</span>
                     </Link>
                     {(user.role === "organisateur" || user.role === "admin") && (
                       <Link
@@ -190,7 +195,7 @@ const Navbar = () => {
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-dusk hover:bg-primary/5 hover:text-primary transition-colors"
                       >
                         <span>➕</span>
-                        <span>Créer un événement</span>
+                        <span>{t("nav.createEvent")}</span>
                       </Link>
                     )}
                   </div>
@@ -203,7 +208,7 @@ const Navbar = () => {
                       className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
                     >
                       <span>🚪</span>
-                      <span>Déconnexion</span>
+                      <span>{t("nav.logout")}</span>
                     </button>
                   </div>
                 </div>
@@ -214,7 +219,7 @@ const Navbar = () => {
               to="/login"
               className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5"
             >
-              Se connecter
+              {t("nav.loginButton")}
             </Link>
           )}
         </div>
@@ -228,7 +233,7 @@ const Navbar = () => {
               <div className="relative flex-1">
                 <input
                   type="text"
-                  placeholder="Rechercher par mot-clé ou ville"
+                  placeholder={t("nav.searchPlaceholder")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full rounded-full border border-dusk/10 bg-white/80 px-4 py-3 pl-11 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
@@ -241,18 +246,18 @@ const Navbar = () => {
                 onChange={(e) => setPriceRange(e.target.value)}
                 className="rounded-full border border-dusk/10 bg-white/80 px-4 py-3 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
               >
-                <option value="">Prix: Tous</option>
+                <option value="">{t("nav.allPrices")}</option>
                 <option value="0-20">0 - 20 €</option>
                 <option value="20-50">20 - 50 €</option>
                 <option value="50-100">50 - 100 €</option>
-                <option value="100-">100 € et +</option>
+                <option value="100-">100 € +</option>
               </select>
 
               <button
                 type="submit"
                 className="rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5"
               >
-                Chercher
+                {t("nav.search")}
               </button>
             </div>
           </form>

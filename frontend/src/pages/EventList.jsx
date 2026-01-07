@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import Spinner from "../components/Spinner";
 import SkeletonEventCard from "../components/SkeletonEventCard";
 import SaveEventButton from "../components/SaveEventButton";
 
 export default function EventList() {
+  const { t } = useTranslation();
   const [events, setEvents] = useState([]);
   const [pages, setPages] = useState(1);
   const [page, setPage] = useState(1);
@@ -50,7 +52,7 @@ export default function EventList() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Voulez-vous vraiment supprimer cet événement ?")) return;
+    if (!window.confirm(t("events.deleteConfirm"))) return;
 
     const backupEvents = events;
     setEvents((prev) => prev.filter((event) => event._id !== id));
@@ -70,10 +72,10 @@ export default function EventList() {
     <section className="min-h-screen bg-gradient-to-b from-white via-[#fff0f6] to-[#ffe1ee] px-4 py-10 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl space-y-10">
         <div className="rounded-[32px] border border-white/70 bg-white/90 p-8 text-center shadow-2xl shadow-primary/20 backdrop-blur">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Programmation</p>
-          <h1 className="mt-4 text-4xl font-bold text-ink">Événements à venir</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">{t("events.schedule")}</p>
+          <h1 className="mt-4 text-4xl font-bold text-ink">{t("events.upcoming")}</h1>
           <p className="mt-3 text-dusk/70">
-            Une sélection raffinée d’expériences culturelles et touristiques créées par la communauté Smart Tourism.
+            {t("events.description")}
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             {(user?.role === "organisateur" || user?.role === "admin") && (
@@ -81,14 +83,14 @@ export default function EventList() {
                 to="/events/create"
                 className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5"
               >
-                ➕ Publier un événement
+                ➕ {t("events.create")}
               </Link>
             )}
             <Link
               to="/"
               className="rounded-full border border-primary/30 px-6 py-3 text-sm font-semibold text-primary transition hover:border-primary hover:bg-primary/5"
             >
-              Retour à l’accueil
+              {t("events.back")}
             </Link>
           </div>
         </div>
@@ -108,20 +110,20 @@ export default function EventList() {
               const daysUntil = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
               let timeIndicator = "";
               if (daysUntil < 0) {
-                timeIndicator = "Passé";
+                timeIndicator = t("events.past");
               } else if (daysUntil === 0) {
-                timeIndicator = "Aujourd'hui 🎉";
+                timeIndicator = t("events.today");
               } else if (daysUntil === 1) {
-                timeIndicator = "Demain ⏰";
+                timeIndicator = t("events.tomorrow");
               } else {
-                timeIndicator = `Dans ${daysUntil}j ⏰`;
+                timeIndicator = t("events.daysAway", { days: daysUntil });
               }
 
               const hasTicketTypes = e.ticketTypes?.length > 0;
               const minPrice = hasTicketTypes
                 ? Math.min(...e.ticketTypes.map((t) => Number(t.price) || 0))
                 : e.price || 0;
-              const priceLabel = minPrice > 0 ? `À partir de ${minPrice} €` : "Gratuit";
+              const priceLabel = minPrice > 0 ? `${t("events.from")} ${minPrice} €` : t("events.free");
 
               return (
                 <article
@@ -161,12 +163,12 @@ export default function EventList() {
                     {/* Organizer Info */}
                     {e.organizer && (
                       <div className="mt-2 text-xs text-dusk/60">
-                        👤 {e.organizer.name || "Organisateur"}
+                        👤 {e.organizer.name || t("nav.dashboard")}
                       </div>
                     )}
 
                     <p className="mt-3 flex-1 text-sm text-dusk/70">
-                      {e.description?.slice(0, 140) || "Découvrez une expérience immersive sélectionnée par nos curateurs."}
+                      {e.description?.slice(0, 140) || t("events.description")}
                     </p>
 
                     {/* Info Badges Row */}
@@ -187,20 +189,20 @@ export default function EventList() {
                     </div>
 
                     <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-sm font-semibold">
-                      <Link to={`/events/${e._id}`} className="text-primary hover:underline" aria-label={`Voir les détails de ${e.title}`}>
-                        Voir les détails →
+                      <Link to={`/events/${e._id}`} className="text-primary hover:underline" aria-label={`${t("events.detail")} ${e.title}`}>
+                        {t("events.detail")} →
                       </Link>
                       {(user?.role === "admin" || user?.role === "organisateur") && (
                         <div className="flex items-center gap-3">
-                          <Link to={`/events/${e._id}/edit`} className="text-dusk/70 hover:text-primary" aria-label={`Modifier ${e.title}`}>
-                            Modifier
+                          <Link to={`/events/${e._id}/edit`} className="text-dusk/70 hover:text-primary" aria-label={`${t("events.modify")} ${e.title}`}>
+                            {t("events.modify")}
                           </Link>
                           <button
                             onClick={() => handleDelete(e._id)}
                             className="text-red-500 transition hover:text-red-600"
-                            aria-label={`Supprimer ${e.title}`}
+                            aria-label={`${t("events.delete")} ${e.title}`}
                           >
-                            Supprimer
+                            {t("events.delete")}
                           </button>
                         </div>
                       )}
@@ -212,17 +214,17 @@ export default function EventList() {
           ) : (
             <div className="col-span-full flex flex-col items-center justify-center gap-4 py-12 text-center">
               <div className="text-6xl">🎭</div>
-              <h3 className="text-xl font-semibold text-ink">Aucun événement trouvé</h3>
+              <h3 className="text-xl font-semibold text-ink">{t("events.noEvents")}</h3>
               <p className="text-dusk/60">
                 {searchParams.toString() 
-                  ? "Essayez d'ajuster vos critères de recherche." 
-                  : "Revenez bientôt pour découvrir des événements fascinants !"}
+                  ? t("events.noCriteria") 
+                  : t("events.comeBack")}
               </p>
               <Link
                 to="/events"
                 className="mt-4 rounded-full bg-primary px-6 py-2 text-sm font-semibold text-white transition hover:bg-primary/90"
               >
-                Réinitialiser la recherche
+                {t("events.resetSearch")}
               </Link>
             </div>
           )}
@@ -235,17 +237,17 @@ export default function EventList() {
               disabled={page <= 1}
               className="rounded-full border border-dusk/20 px-4 py-2 text-sm font-semibold text-dusk transition hover:bg-dusk/5 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              ← Précédent
+              {t("common.previous")}
             </button>
             <span className="text-sm font-semibold text-dusk/70">
-              Page {page} / {pages}
+              {t("common.page")} {page} {t("common.of")} {pages}
             </span>
             <button
               onClick={() => handlePageChange(page + 1)}
               disabled={page >= pages}
               className="rounded-full border border-dusk/20 px-4 py-2 text-sm font-semibold text-dusk transition hover:bg-dusk/5 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Suivant →
+              {t("common.next")}
             </button>
           </div>
         )}

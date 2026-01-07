@@ -1,8 +1,10 @@
 import { useState } from "react";
 import axios from "axios";
+import { useTranslation } from "react-i18next";
 
 const ItineraryPlan = () => {
   const token = localStorage.getItem("token");
+  const { t } = useTranslation();
   const user = JSON.parse(localStorage.getItem("user") || "null");
 
   const [form, setForm] = useState({
@@ -102,28 +104,28 @@ const ItineraryPlan = () => {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 lg:px-6">
-      <h1 className="text-2xl font-bold text-ink">Planifier un itinéraire</h1>
+      <h1 className="text-2xl font-bold text-ink">{t("itinerary.title")}</h1>
       <p className="text-dusk mt-1">
-        Optimisez vos visites en fonction du temps disponible.
+        {t("itinerary.subtitle")}
       </p>
 
       <form onSubmit={submit} className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="rounded-xl border border-dusk/10 bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-semibold text-ink">Paramètres</h2>
+          <h2 className="text-sm font-semibold text-ink">{t("itinerary.parameters")}</h2>
           <div className="mt-3 grid grid-cols-2 gap-3">
-            <label className="text-xs text-dusk">Temps disponible (min)
+            <label className="text-xs text-dusk">{t("itinerary.availableTime")}
               <input name="availableMinutes" value={form.availableMinutes} onChange={handleChange} type="number" min="30" className="mt-1 w-full rounded-lg border border-dusk/20 px-3 py-2 text-sm" />
             </label>
-            <label className="text-xs text-dusk">Mode
+            <label className="text-xs text-dusk">{t("itinerary.mode")}
               <select name="mode" value={form.mode} onChange={handleChange} className="mt-1 w-full rounded-lg border border-dusk/20 px-3 py-2 text-sm">
-                <option value="walking">À pied</option>
-                <option value="driving">Voiture</option>
+                <option value="walking">{t("itinerary.walking")}</option>
+                <option value="driving">{t("itinerary.driving")}</option>
               </select>
             </label>
-            <label className="text-xs text-dusk">Nombre maximum d'arrêts
+            <label className="text-xs text-dusk">{t("itinerary.maxStops")}
               <input name="maxStops" value={form.maxStops} onChange={handleChange} type="number" min="1" className="mt-1 w-full rounded-lg border border-dusk/20 px-3 py-2 text-sm" />
             </label>
-            <label className="text-xs text-dusk">Durée par événement (min)
+            <label className="text-xs text-dusk">{t("itinerary.duration")}
               <input name="defaultEventDurationMinutes" value={form.defaultEventDurationMinutes} onChange={handleChange} type="number" min="15" className="mt-1 w-full rounded-lg border border-dusk/20 px-3 py-2 text-sm" />
             </label>
             {/* <label className="col-span-2 flex items-center gap-2 text-xs text-dusk">
@@ -132,15 +134,15 @@ const ItineraryPlan = () => {
             </label> */}
             <label className="col-span-2 flex items-center gap-2 text-xs text-dusk">
               <input type="checkbox" name="strictFilters" checked={form.strictFilters} onChange={handleChange} />
-              Garder ville et catégories strictes (pas de relâchement)
+              {t("itinerary.strictFilters")}
             </label>
-            <label className="text-xs text-dusk">Ville (option)
+            <label className="text-xs text-dusk">{t("itinerary.city")}
               <input name="city" value={form.city} onChange={handleChange} type="text" placeholder={user?.city || "Tunis"} className="mt-1 w-full rounded-lg border border-dusk/20 px-3 py-2 text-sm" />
             </label>
           </div>
           <div className="mt-3 flex items-center gap-2">
             <button type="button" onClick={useMyLocation} className="rounded-full border border-primary/30 px-3 py-2 text-xs font-semibold text-primary hover:border-primary hover:bg-primary/10">
-              📍 Utiliser ma position
+              {t("itinerary.useMyLocation")}
             </button>
             {form.start && (
               <span className="text-xs text-dusk">Start: {form.start.lat.toFixed(4)}, {form.start.lng.toFixed(4)}</span>
@@ -149,7 +151,7 @@ const ItineraryPlan = () => {
         </div>
 
         <div className="rounded-xl border border-dusk/10 bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-semibold text-ink">Catégories</h2>
+          <h2 className="text-sm font-semibold text-ink">{t("itinerary.categories")}</h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {CATEGORY_OPTIONS.map((cat) => (
               <button
@@ -166,7 +168,7 @@ const ItineraryPlan = () => {
 
         <div className="md:col-span-2 flex items-center justify-between">
           <button type="submit" disabled={loading} className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white shadow-glow disabled:opacity-50">
-            {loading ? "Calcul..." : "Planifier"}
+            {loading ? t("itinerary.calculating") : t("itinerary.plan")}
           </button>
           {error && <p className="text-sm text-red-600">{error}</p>}
         </div>
@@ -174,10 +176,10 @@ const ItineraryPlan = () => {
 
       {result && (
         <div className="mt-6 rounded-xl border border-dusk/10 bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-semibold text-ink">Itinéraire</h2>
-          <p className="text-xs text-dusk mt-1">Arrêts: {result.results?.count} • Temps utilisé: {result.results?.totalMinutesUsed} min • Reste: {result.results?.remainingMinutes} min</p>
+          <h2 className="text-sm font-semibold text-ink">{t("itinerary.itineraryResult")}</h2>
+          <p className="text-xs text-dusk mt-1">{t("itinerary.stops")} {result.results?.count} • {t("itinerary.timeUsed")} {result.results?.totalMinutesUsed} min • {t("itinerary.remaining")} {result.results?.remainingMinutes} min</p>
           {result.paramsUsed?.mode && (
-            <p className="text-[11px] text-dusk/70 mt-1">Mode: {result.paramsUsed.mode === "walking" ? "À pied" : "Voiture"}</p>
+            <p className="text-[11px] text-dusk/70 mt-1">Mode: {result.paramsUsed.mode === "walking" ? t("itinerary.walking") : t("itinerary.driving")}</p>
           )}
 
           {result.debug && (
@@ -192,10 +194,10 @@ const ItineraryPlan = () => {
 
           {result.results?.count === 0 && (
             <div className="mt-3 rounded-lg bg-orange-50 border border-orange-200 p-3 text-sm text-orange-800">
-              <p className="font-semibold">Aucun événement ne rentre dans le temps disponible.</p>
+              <p className="font-semibold">{t("itinerary.noResults")}</p>
               {result.suggestions?.length > 0 && (
                 <div className="mt-2 text-orange-900">
-                  <p className="font-semibold">Suggestions (les plus proches) :</p>
+                  <p className="font-semibold">{t("itinerary.suggestions")}</p>
                   <ul className="mt-1 ml-4 list-disc">
                     {result.suggestions.map(s => (
                       <li key={s.eventId}>
@@ -206,11 +208,11 @@ const ItineraryPlan = () => {
                 </div>
               )}
               <div className="mt-2">
-                Essayez de:
+                {t("itinerary.tryTips")}
                 <ul className="mt-1 ml-4 list-disc">
-                  <li>Passer en mode "Voiture"</li>
-                  <li>Diminuer la durée par événement (ou la durée des événements)</li>
-                  <li>Agrandir le temps disponible</li>
+                  <li>{t("itinerary.tip1")}</li>
+                  <li>{t("itinerary.tip2")}</li>
+                  <li>{t("itinerary.tip3")}</li>
                 </ul>
               </div>
             </div>

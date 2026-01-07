@@ -1,0 +1,79 @@
+{
+  "nav": {
+    "home": "Home",
+    "events": "Events",
+    "search": "Search",
+    "register": "Register",
+    "login": "Login",
+    "createEvent": "Create Event",
+    "myProfile": "My Profile",
+    "dashboard": "Dashboard",
+    "myEvents": "My Events",
+    "favorites": "Favorites",
+    "recommendations": "Recommendations",
+    "itinerary": "Itinerary",
+    "notifications": "Notifications",
+    "logout": "Logout",
+    "loginButton": "Sign In",
+    "searchPlaceholder": "Search by keyword or city",
+    "allPrices": "Price: All"
+  },
+  "hero": {
+    "title": "Smart Tourism Platform",
+    "subtitle": "Discover cultural and tourism experiences"
+  },
+  "events": {
+    "title": "Events",
+    "create": "Create Event",
+    "edit": "Edit Event",
+    "delete": "Delete Event",
+    "save": "Save Event",
+    "unsave": "Unsave Event",
+    "upcoming": "Upcoming Events",
+    "noEvents": "No events found"
+  },
+  "itinerary": {
+    "title": "Plan Itinerary",
+    "availableTime": "Available Time (min)",
+    "mode": "Mode",
+    "maxStops": "Max Stops",
+    "duration": "Event Duration (min)",
+    "cityOnly": "Restrict to my city",
+    "strictFilters": "Keep city and categories strict (no relaxation)",
+    "categories": "Categories",
+    "startLocation": "Start Location",
+    "useMyLocation": "Use My Location",
+    "plan": "Plan",
+    "calculating": "Calculating...",
+    "stops": "Stops",
+    "timeUsed": "Time Used",
+    "remaining": "Remaining",
+    "noResults": "No events fit in available time",
+    "walking": "Walking",
+    "driving": "Driving"
+  },
+  "profile": {
+    "title": "Profile",
+    "name": "Name",
+    "email": "Email",
+    "city": "City",
+    "interests": "Interests",
+    "budgetMin": "Min Budget (€)",
+    "budgetMax": "Max Budget (€)",
+    "save": "Save",
+    "geolocation": "Use Geolocation"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "price": "Price",
+    "date": "Date",
+    "city": "City",
+    "category": "Category"
+  }
+}

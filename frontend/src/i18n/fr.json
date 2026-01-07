@@ -1,0 +1,79 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "events": "Événements",
+    "search": "Chercher",
+    "register": "Inscription",
+    "login": "Connexion",
+    "createEvent": "Créer un événement",
+    "myProfile": "Mon profil",
+    "dashboard": "Tableau de bord",
+    "myEvents": "Mes événements",
+    "favorites": "Favoris",
+    "recommendations": "Recommandations",
+    "itinerary": "Itinéraire",
+    "notifications": "Notifications",
+    "logout": "Déconnexion",
+    "loginButton": "Se connecter",
+    "searchPlaceholder": "Rechercher par mot-clé ou ville",
+    "allPrices": "Prix: Tous"
+  },
+  "hero": {
+    "title": "Plateforme de Tourisme Intelligent",
+    "subtitle": "Découvrez des expériences culturelles et touristiques"
+  },
+  "events": {
+    "title": "Événements",
+    "create": "Créer un événement",
+    "edit": "Modifier l'événement",
+    "delete": "Supprimer l'événement",
+    "save": "Enregistrer l'événement",
+    "unsave": "Retirer de mes favoris",
+    "upcoming": "Événements à venir",
+    "noEvents": "Aucun événement trouvé"
+  },
+  "itinerary": {
+    "title": "Planifier un itinéraire",
+    "availableTime": "Temps disponible (min)",
+    "mode": "Mode",
+    "maxStops": "Nombre maximum d'arrêts",
+    "duration": "Durée par événement (min)",
+    "cityOnly": "Restreindre à ma ville",
+    "strictFilters": "Garder ville et catégories strictes (pas de relâchement)",
+    "categories": "Catégories",
+    "startLocation": "Localisation de départ",
+    "useMyLocation": "Utiliser ma position",
+    "plan": "Planifier",
+    "calculating": "Calcul...",
+    "stops": "Arrêts",
+    "timeUsed": "Temps utilisé",
+    "remaining": "Temps restant",
+    "noResults": "Aucun événement ne rentre dans le temps disponible",
+    "walking": "À pied",
+    "driving": "Voiture"
+  },
+  "profile": {
+    "title": "Profil",
+    "name": "Nom",
+    "email": "Email",
+    "city": "Ville",
+    "interests": "Intérêts",
+    "budgetMin": "Budget minimum (€)",
+    "budgetMax": "Budget maximum (€)",
+    "save": "Enregistrer",
+    "geolocation": "Utiliser la géolocalisation"
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "price": "Prix",
+    "date": "Date",
+    "city": "Ville",
+    "category": "Catégorie"
+  }
+}
