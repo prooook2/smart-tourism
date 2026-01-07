@@ -14,7 +14,7 @@ const sendEmail = async (to, subject, html, attachments) => {
     });
 
     const info = await transporter.sendMail({
-      from: `"Smart Tourism" <${process.env.EMAIL_USER}>`,
+      from: `"GLOBECULT" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html,
